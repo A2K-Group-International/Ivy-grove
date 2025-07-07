@@ -39,6 +39,17 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-school-50: var(--color-school-50);
+  --color-school-100: var(--color-school-100);
+  --color-school-200: var(--color-school-200);
+  --color-school-300: var(--color-school-300);
+  --color-school-400: var(--color-school-400);
+  --color-school-500: var(--color-school-500);
+  --color-school-600: var(--color-school-600);
+  --color-school-700: var(--color-school-700);
+  --color-school-800: var(--color-school-800);
+  --color-school-900: var(--color-school-900);
+  --color-school-950: var(--color-school-950);
 }
 
 :root {
@@ -74,6 +85,18 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  --color-school-50: oklch(0.99 0.01 142);
+  --color-school-100: oklch(0.96 0.03 142);
+  --color-school-200: oklch(0.91 0.06 142);
+  --color-school-300: oklch(0.82 0.12 142);
+  --color-school-400: oklch(0.71 0.15 142);
+  --color-school-500: oklch(0.61 0.16 142);
+  --color-school-600: oklch(0.45 0.15 142);
+  --color-school-700: oklch(0.35 0.12 142);
+  --color-school-800: oklch(0.28 0.09 142);
+  --color-school-900: oklch(0.22 0.06 142);
+  --color-school-950: oklch(0.15 0.04 142);
 }
 
 .dark {

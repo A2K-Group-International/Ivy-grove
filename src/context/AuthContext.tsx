@@ -36,9 +36,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [initializing, setInitializing] = useState<boolean>(true);
-  console.log(user);
-
-  console.log(userRole);
 
   // Function to extract role from user metadata
   const extractUserRole = (user: User | null): UserRole | null => {
