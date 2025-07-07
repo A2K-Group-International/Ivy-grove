@@ -4,6 +4,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -13,6 +14,15 @@ import Students from "@/pages/dashboard/Students";
 import Teachers from "@/pages/dashboard/Teachers";
 import Classes from "@/pages/dashboard/Classes";
 import Schedule from "@/pages/dashboard/Schedule";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function AppRoutes() {
   const { user, userRole, initializing } = useAuth();
@@ -28,13 +38,13 @@ function AppRoutes() {
   // Role-based redirect logic
   const getRoleBasedRedirect = () => {
     if (!user) return <Landing />;
-    
+
     switch (userRole) {
-      case 'admin':
+      case "admin":
         return <Navigate to="/dashboard" replace />;
-      case 'teacher':
+      case "teacher":
         return <Navigate to="/teacher-dashboard" replace />;
-      case 'parent':
+      case "parent":
         return <Navigate to="/parent-dashboard" replace />;
       default:
         return <Navigate to="/parent-dashboard" replace />;
@@ -44,12 +54,12 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={getRoleBasedRedirect()} />
-      
+
       {/* Admin Routes */}
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute allowedRoles={['admin']}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <DashboardLayout />
           </ProtectedRoute>
         }
@@ -65,7 +75,7 @@ function AppRoutes() {
       <Route
         path="/teacher-dashboard"
         element={
-          <ProtectedRoute allowedRoles={['teacher']}>
+          <ProtectedRoute allowedRoles={["teacher"]}>
             <DashboardLayout />
           </ProtectedRoute>
         }
@@ -83,7 +93,7 @@ function AppRoutes() {
       <Route
         path="/parent-dashboard"
         element={
-          <ProtectedRoute allowedRoles={['parent']}>
+          <ProtectedRoute allowedRoles={["parent"]}>
             <DashboardLayout />
           </ProtectedRoute>
         }
@@ -102,11 +112,13 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router>
+          <AppRoutes />
+        </Router>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

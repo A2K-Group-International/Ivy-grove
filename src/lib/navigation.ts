@@ -4,20 +4,19 @@ import {
   GraduationCap,
   BookOpen,
   Calendar,
-  Settings,
   FileText,
   MessageSquare,
-  BarChart3,
   UserCheck,
   ClipboardList,
   Baby,
+  type LucideIcon,
 } from "lucide-react";
 import type { UserRole } from "@/context/AuthContext";
 
 export interface MenuItem {
   title: string;
   url: string;
-  icon: any;
+  icon: LucideIcon;
   roles: UserRole[];
 }
 
@@ -47,60 +46,18 @@ export const menuItems: MenuItem[] = [
     icon: BookOpen,
     roles: ["admin"],
   },
-  {
-    title: "Reports",
-    url: "/dashboard/reports",
-    icon: BarChart3,
-    roles: ["admin"],
-  },
-  {
-    title: "Settings",
-    url: "/dashboard/settings",
-    icon: Settings,
-    roles: ["admin"],
-  },
 
   // Teacher only
   {
-    title: "My Dashboard",
+    title: "Announcement",
     url: "/teacher-dashboard",
     icon: Home,
-    roles: ["teacher"],
-  },
-  {
-    title: "My Classes",
-    url: "/teacher-dashboard/classes",
-    icon: BookOpen,
-    roles: ["teacher"],
-  },
-  {
-    title: "Students",
-    url: "/teacher-dashboard/students",
-    icon: Users,
     roles: ["teacher"],
   },
   {
     title: "Attendance",
     url: "/teacher-dashboard/attendance",
     icon: UserCheck,
-    roles: ["teacher"],
-  },
-  {
-    title: "Assignments",
-    url: "/teacher-dashboard/assignments",
-    icon: ClipboardList,
-    roles: ["teacher"],
-  },
-  {
-    title: "Schedule",
-    url: "/teacher-dashboard/schedule",
-    icon: Calendar,
-    roles: ["teacher"],
-  },
-  {
-    title: "Messages",
-    url: "/teacher-dashboard/messages",
-    icon: MessageSquare,
     roles: ["teacher"],
   },
 
@@ -151,5 +108,5 @@ export const menuItems: MenuItem[] = [
 
 export const getMenuItemsForRole = (role: UserRole | null): MenuItem[] => {
   if (!role) return [];
-  return menuItems.filter(item => item.roles.includes(role));
+  return menuItems.filter((item) => item.roles.includes(role));
 };

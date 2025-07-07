@@ -1,15 +1,29 @@
-import { supabase } from "@/lib/supabase";
-import type { Session, User, AuthError } from "@supabase/supabase-js";
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+} from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  AuthService,
+  type UserRole,
+  type UserProfile,
+} from "@/services/auth.service";
+import {
+  useSession,
+  useUserProfile,
+  useAuthQueries,
+  AUTH_KEYS,
+} from "@/hooks/useAuth";
+import type { Session, User } from "@supabase/supabase-js";
 
-// Define user roles
-export type UserRole = "admin" | "teacher" | "parent";
-
-// Define AuthContext
 interface AuthContextData {
   user: User | null;
   session: Session | null;
   userRole: UserRole | null;
+  userProfile: UserProfile | null;
   loading: boolean;
   initializing: boolean;
   signIn: (email: string, password: string) => Promise<void>;
@@ -17,11 +31,11 @@ interface AuthContextData {
   signOut: () => Promise<void>;
 }
 
-// Create the context with default values
 const AuthContext = createContext<AuthContextData>({
   user: null,
   session: null,
   userRole: null,
+  userProfile: null,
   loading: false,
   initializing: true,
   signIn: async () => {},
@@ -29,95 +43,83 @@ const AuthContext = createContext<AuthContextData>({
   signOut: async () => {},
 });
 
-// Create a provider component that will wrap our app
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [initializing, setInitializing] = useState<boolean>(true);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);
+  const queryClient = useQueryClient();
+  const { invalidateAll, invalidateSession, invalidateProfile } =
+    useAuthQueries();
 
-  // Function to extract role from user metadata
-  const extractUserRole = (user: User | null): UserRole | null => {
-    if (!user) return null;
-    const role = user.user_metadata?.role || user.app_metadata?.role;
-    if (role === "admin" || role === "teacher" || role === "parent") {
-      return role as UserRole;
-    }
-    // Default to 'parent' if no role is set
-    return "parent";
-  };
+  // Get session data
+  const { data: session, isLoading: sessionLoading } = useSession();
 
-  // Check if user is logged in when app starts
+  // Get user profile data
+  const { data: userProfile, isLoading: profileLoading } = useUserProfile(
+    session?.user?.id
+  );
+
+  // Derived values
+  const user = session?.user || null;
+  const userRole = userProfile?.role ?? null;
+
+  // Handle auth state changes
   useEffect(() => {
-    setInitializing(true);
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setUserRole(extractUserRole(session?.user ?? null));
-
-      setInitializing(false);
-    });
-
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setUserRole(extractUserRole(session?.user ?? null));
+    } = AuthService.onAuthStateChange(async (event, session) => {
+      // Update session in cache
+      queryClient.setQueryData(AUTH_KEYS.session, session);
+
+      // If user logs out, clear all auth data
+      if (event === "SIGNED_OUT") {
+        invalidateAll();
+      }
+
+      // If user signs in, fetch their profile
+      if (event === "SIGNED_IN" && session?.user?.id) {
+        invalidateProfile(session.user.id);
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [queryClient, invalidateAll, invalidateProfile]);
+
+  // Handle initialization
+  useEffect(() => {
+    if (!sessionLoading) {
+      setInitializing(false);
+    }
+  }, [sessionLoading]);
 
   // Sign in function
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
+      await AuthService.signIn(email, password);
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Invalidate session to refetch
+      invalidateSession();
 
-      if (error) throw error;
-
-      // Set metadata if missing (for existing users)
-      if (data.user) {
-        if (!data.user.user_metadata?.password_setup_complete) {
-          await supabase.auth.updateUser({
-            data: {
-              ...data.user.user_metadata,
-              password_setup_complete: true,
-            },
-          });
-        }
-      }
-    } catch (error: unknown) {
-      const err = error as AuthError;
-      console.error("Login failed:", err.message);
+      // Invalidate profile to refetch
+      invalidateProfile(email);
+    } catch (error) {
+      console.error("Login failed:", error);
       throw error;
     } finally {
       setLoading(false);
     }
   };
 
+  // Update password function
   const enrollPassword = async (password: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.updateUser({
-        password: password,
-        data: {
-          password_setup_complete: true,
-          password_set_at: new Date().toISOString(),
-        },
-      });
+      await AuthService.updatePassword(password);
 
-      if (error) throw error;
-    } catch (error: unknown) {
-      const err = error as AuthError;
-      console.error("Set password Error:", err.message);
+      // Invalidate session to refetch
+      invalidateSession();
+    } catch (error) {
+      console.error("Password update failed:", error);
       throw error;
     } finally {
       setLoading(false);
@@ -128,24 +130,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     try {
       setLoading(true);
+      await AuthService.signOut();
 
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-    } catch (error: unknown) {
-      const err = error as Error;
-
-      console.error("Signout Error:", err.message);
+      // Clear all auth data
+      invalidateAll();
+    } catch (error) {
+      console.error("Sign out failed:", error);
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  // The value that will be available to all child components
   const value = {
     user,
-    session,
+    session: session ?? null,
     userRole,
-    loading,
+    userProfile: userProfile ?? null,
+    loading: loading || sessionLoading || profileLoading,
     initializing,
     signIn,
     enrollPassword,
@@ -155,13 +157,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Custom hook to use the auth context
 export function useAuth() {
   const context = useContext(AuthContext);
-
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-
   return context;
 }
+
+export type { UserRole };

@@ -6,7 +6,10 @@ interface ProtectedRouteProps {
   allowedRoles?: UserRole[];
 }
 
-export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({
+  children,
+  allowedRoles,
+}: ProtectedRouteProps) => {
   const { user, userRole, initializing } = useAuth();
 
   if (initializing) {
@@ -25,11 +28,11 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
   if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
     // Redirect to appropriate dashboard based on user's actual role
     switch (userRole) {
-      case 'admin':
+      case "admin":
         return <Navigate to="/dashboard" replace />;
-      case 'teacher':
+      case "teacher":
         return <Navigate to="/teacher-dashboard" replace />;
-      case 'parent':
+      case "parent":
         return <Navigate to="/parent-dashboard" replace />;
       default:
         return <Navigate to="/" replace />;

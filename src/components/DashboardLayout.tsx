@@ -14,16 +14,13 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import {
-  LogOut,
-  School,
-} from "lucide-react";
+import { LogOut, School } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function DashboardLayout() {
   const { signOut, userRole } = useAuth();
   const location = useLocation();
-  
+
   const menuItems = getMenuItemsForRole(userRole);
 
   const handleLogout = async () => {
@@ -36,7 +33,7 @@ export function DashboardLayout() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-dvh w-full">
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2 px-4 py-2">
@@ -50,7 +47,10 @@ export function DashboardLayout() {
                 <SidebarMenu>
                   {menuItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={location.pathname === item.url}
+                      >
                         <Link to={item.url} className="flex items-center gap-2">
                           <item.icon className="h-4 w-4" />
                           <span>{item.title}</span>
