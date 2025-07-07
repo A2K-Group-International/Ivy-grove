@@ -6,7 +6,10 @@ export type UserRole = "admin" | "teacher" | "parent";
 export interface UserProfile {
   id: string;
   email: string;
+  first_name: string;
+  last_name: string;
   role: UserRole;
+  contact: string;
   created_at: string;
   updated_at: string;
 }
@@ -96,21 +99,70 @@ export class AuthService {
   /**
    * Create new user profile
    */
-  static async createUserProfile(
+  static async createAccount(
+    id: string,
     email: string,
-    role: UserRole = "parent"
+    first_name: string,
+    last_name: string,
+    contact: string,
+    role: UserRole
   ): Promise<UserProfile> {
     const { data, error } = await supabase
       .from("users")
       .insert({
+        id,
         email,
+        contact,
+        first_name,
+        last_name,
         role,
       })
-      .select("*")
       .single();
 
     if (error) throw error;
     return data;
+  }
+
+  static async createTeacher(
+    email: string,
+    password: string,
+    contact: string,
+    first_name: string,
+    last_name: string
+  ): Promise<UserProfile> {
+    try {
+      // Sign up user
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error("Supabase signUp error:", {
+          message: error.message,
+          details: error,
+        });
+        throw error;
+      }
+
+      if (!data?.user?.id) {
+        throw new Error("User id  is not found");
+      }
+
+      const profile = await this.createAccount(
+        data.user.id,
+        email,
+        first_name,
+        last_name,
+        contact,
+        "teacher" // role
+      );
+
+      return profile;
+    } catch (error) {
+      console.error("Error creating teacher:", error);
+      throw error;
+    }
   }
 
   /**

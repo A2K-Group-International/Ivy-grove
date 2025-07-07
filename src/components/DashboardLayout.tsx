@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { getMenuItemsForRole } from "@/lib/navigation";
 import {
@@ -14,14 +14,17 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { LogOut, School } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function DashboardLayout() {
   const { signOut, userRole } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const menuItems = getMenuItemsForRole(userRole);
+
+  const isAdmin = userRole === "admin";
 
   const handleLogout = async () => {
     try {
@@ -31,14 +34,23 @@ export function DashboardLayout() {
     }
   };
 
+  const navigateSettings = () => {
+    navigate("/settings");
+  };
+
   return (
     <SidebarProvider>
       <div className="flex min-h-dvh w-full">
         <Sidebar>
           <SidebarHeader>
-            <div className="flex items-center gap-2 px-4 py-2">
-              <School className="h-6 w-6" />
-              <span className="font-semibold">Ivy Grove School</span>
+            <div className="flex flex-col justify-center items-center gap-2 px-4 py-2">
+              <div className="w-24">
+                <img src="/ivy-logo.png" />
+              </div>
+
+              <span className="font-semibold text-school-600 text-center">
+                Ivy Grove Magdalene School, Inc.
+              </span>
             </div>
           </SidebarHeader>
           <SidebarContent>
@@ -51,9 +63,14 @@ export function DashboardLayout() {
                         asChild
                         isActive={location.pathname === item.url}
                       >
-                        <Link to={item.url} className="flex items-center gap-2">
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
+                        <Link
+                          to={item.url}
+                          className="flex items-center gap-3 px-2 py-1 transition-all"
+                        >
+                          <item.icon className="h-5 w-5 text-school-600" />
+                          <span className="text-base font-medium">
+                            {item.title}
+                          </span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -65,14 +82,21 @@ export function DashboardLayout() {
           <SidebarFooter>
             <SidebarMenu>
               <SidebarMenuItem>
-                <Button
-                  onClick={handleLogout}
-                  variant="ghost"
-                  className="w-full justify-start gap-2"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </Button>
+                <div className="flex items-center justify-between">
+                  <Button
+                    onClick={handleLogout}
+                    variant="ghost"
+                    className="justify-start gap-2 hover:bg-school-600 hover:text-white"
+                  >
+                    <LogOut className="h-6 w-6" />
+                    Logout
+                  </Button>
+                  {isAdmin && (
+                    <Button variant="ghost" onClick={navigateSettings}>
+                      <Settings className="h-12 w-12" />
+                    </Button>
+                  )}
+                </div>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarFooter>

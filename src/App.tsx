@@ -9,11 +9,12 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import Landing from "@/pages/Landing";
-import Overview from "@/pages/dashboard/Overview";
-import Students from "@/pages/dashboard/Students";
-import Teachers from "@/pages/dashboard/Teachers";
-import Classes from "@/pages/dashboard/Classes";
-import Schedule from "@/pages/dashboard/Schedule";
+import Overview from "@/pages/Protected/Overview";
+import Students from "@/pages/Protected/Students";
+import Teachers from "@/pages/Protected/Teachers";
+import Schedule from "@/pages/Protected/Schedule";
+import Settings from "@/pages/Protected/Settings";
+import { Loader } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,12 +26,12 @@ const queryClient = new QueryClient({
 });
 
 function AppRoutes() {
-  const { user, userRole, initializing } = useAuth();
+  const { user, userRole, initializing, loading } = useAuth();
 
-  if (initializing) {
+  if (initializing || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+        <Loader className="animate-spin" />
       </div>
     );
   }
@@ -43,11 +44,11 @@ function AppRoutes() {
       case "admin":
         return <Navigate to="/dashboard" replace />;
       case "teacher":
-        return <Navigate to="/teacher-dashboard" replace />;
+        return <Navigate to="/announcement" replace />;
       case "parent":
-        return <Navigate to="/parent-dashboard" replace />;
+        return <Navigate to="/announcement" replace />;
       default:
-        return <Navigate to="/parent-dashboard" replace />;
+        return <Navigate to="/" replace />;
     }
   };
 
@@ -55,56 +56,73 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={getRoleBasedRedirect()} />
 
-      {/* Admin Routes */}
       <Route
-        path="/dashboard"
+        path="/*"
         element={
-          <ProtectedRoute allowedRoles={["admin"]}>
+          <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
             <DashboardLayout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<Overview />} />
-        <Route path="students" element={<Students />} />
-        <Route path="teachers" element={<Teachers />} />
-        <Route path="classes" element={<Classes />} />
-        <Route path="schedule" element={<Schedule />} />
-      </Route>
+        {/* Admin Routes */}
+        <Route
+          path="dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <Overview />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="students"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "teacher"]}>
+              <Students />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="teachers"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <Teachers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="schedule"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "teacher"]}>
+              <Schedule />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="announcement"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
+              <div>Announcement Page</div>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Teacher Routes */}
-      <Route
-        path="/teacher-dashboard"
-        element={
-          <ProtectedRoute allowedRoles={["teacher"]}>
-            <DashboardLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<div>Teacher Dashboard</div>} />
-        <Route path="classes" element={<div>Teacher Classes</div>} />
-        <Route path="students" element={<div>Teacher Students</div>} />
-        <Route path="attendance" element={<div>Teacher Attendance</div>} />
-        <Route path="assignments" element={<div>Teacher Assignments</div>} />
-        <Route path="schedule" element={<div>Teacher Schedule</div>} />
-        <Route path="messages" element={<div>Teacher Messages</div>} />
-      </Route>
-
-      {/* Parent Routes */}
-      <Route
-        path="/parent-dashboard"
-        element={
-          <ProtectedRoute allowedRoles={["parent"]}>
-            <DashboardLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<div>Parent Dashboard</div>} />
-        <Route path="children" element={<div>My Children</div>} />
-        <Route path="attendance" element={<div>Child Attendance</div>} />
-        <Route path="assignments" element={<div>Child Assignments</div>} />
-        <Route path="schedule" element={<div>Child Schedule</div>} />
-        <Route path="reports" element={<div>Child Reports</div>} />
-        <Route path="messages" element={<div>Parent Messages</div>} />
+        {/* Parent Routes */}
+        <Route
+          path="children"
+          element={
+            <ProtectedRoute allowedRoles={["parent"]}>
+              <div>My Children</div>
+            </ProtectedRoute>
+          }
+        />
       </Route>
     </Routes>
   );
