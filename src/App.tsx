@@ -10,13 +10,12 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import Landing from "@/pages/Landing";
 import Overview from "@/pages/Protected/Overview";
-import Students from "@/pages/Protected/Students";
-import Teachers from "@/pages/Protected/Teachers";
 import Schedule from "@/pages/Protected/Schedule";
 import Settings from "@/pages/Protected/Settings";
 import { Loader } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import Users from "@/pages/Protected/Users";
+import SchoolYear from "@/pages/Protected/SchoolYear";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,9 +27,9 @@ const queryClient = new QueryClient({
 });
 
 function AppRoutes() {
-  const { user, userRole, initializing, loading } = useAuth();
+  const { user, userRole, initializing } = useAuth();
 
-  if (initializing || loading) {
+  if (initializing) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader className="animate-spin" />
@@ -84,18 +83,10 @@ function AppRoutes() {
           }
         />
         <Route
-          path="students"
-          element={
-            <ProtectedRoute allowedRoles={["admin", "teacher"]}>
-              <Students />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="teachers"
+          path="school-year"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <Teachers />
+              <SchoolYear />
             </ProtectedRoute>
           }
         />

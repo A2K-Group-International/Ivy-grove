@@ -21,50 +21,67 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Loader, Lock, Mail, PlusIcon, User } from "lucide-react";
+import {
+  Calendar,
+  CalendarDays,
+  Loader,
+  PersonStanding,
+  PlusIcon,
+  User,
+} from "lucide-react";
 import { useState } from "react";
-import { useCreateTeacher } from "@/hooks/useTeacher";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useFetchSchoolYears } from "@/hooks/useSchoolYear";
+import type { SchoolYear } from "@/services/schoolYear.service";
+import { format } from "date-fns";
+import { useFetchParentsNoPagination } from "@/hooks/useParents";
+import type { FetchParentNoPagination } from "@/services/user.service";
+import { useCreateStudent } from "@/hooks/useStudent";
 
-const createTeacherSchema = z.object({
+const createStudentSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
-  contact: z
-    .string()
-    .length(11, "Contact must be exactly 11 digits")
-    .regex(/^\d+$/, "Contact must contain only numbers"),
-  email: z.string().email("Email must be valid"),
-  password: z.string().min(6, "Password must be at least 6 characters."),
+  parent_id: z.string().min(1, "Parent is required"),
+  school_year_id: z.string().min(1, "School Year ID is required"),
+  age: z.coerce.number().int().min(1, "Age is required"),
 });
 
-export function CreateTeacher() {
+export function CreateStudents() {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
-  const { mutate: createTeacher, isPending } = useCreateTeacher();
+  const { mutate: createStudent, isPending } = useCreateStudent();
+  const { data: schoolYears, isLoading: isSchoolYearsLoading } =
+    useFetchSchoolYears();
+  const { data: parents, isLoading: isParentsLoading } =
+    useFetchParentsNoPagination();
 
-  const form = useForm({
-    resolver: zodResolver(createTeacherSchema),
+  const form = useForm<z.infer<typeof createStudentSchema>>({
+    resolver: zodResolver(createStudentSchema),
     defaultValues: {
       first_name: "",
       last_name: "",
-      contact: "",
-      email: "",
-      password: "",
+      age: 0,
+      school_year_id: "",
+      parent_id: "",
     },
+    mode: "onChange",
   });
 
-  const togglePasswordVisibility = () => {
-    setPasswordVisible((prevState) => !prevState);
-  };
-
   const handleCreateTeacher = async (
-    values: z.infer<typeof createTeacherSchema>
+    values: z.infer<typeof createStudentSchema>
   ) => {
-    createTeacher(values, {
+    createStudent(values, {
       onSuccess: () => {
         form.reset();
         setOpenDialog(false);
       },
     });
+    console.log(values);
   };
 
   return (
@@ -77,17 +94,17 @@ export function CreateTeacher() {
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Add teacher</DialogTitle>
+            <DialogTitle>Add Student</DialogTitle>
             <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
-              done.
+              Fill out the student details below to register a new student. Once
+              completed, click Save to add them to the system.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(handleCreateTeacher)}
-                id="create-teacher"
+                id="create-student"
                 className="space-y-2"
               >
                 <div className="flex flex-col md:flex-row gap-x-2">
@@ -141,19 +158,19 @@ export function CreateTeacher() {
 
                 <FormField
                   control={form.control}
-                  name="contact"
+                  name="age"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm text-school-600 font-medium">
-                        Contact
+                        Age
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Input
-                            type="text"
+                            type="number"
                             className="pl-10 focus:ring-ring"
-                            placeholder="Contact No."
+                            placeholder="Age"
                             {...field}
                           />
                         </div>
@@ -165,22 +182,18 @@ export function CreateTeacher() {
 
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="school_year_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm text-school-600 font-medium">
-                        Email
+                        School Year
                       </FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            type="email"
-                            className="pl-10 focus:ring-ring"
-                            placeholder="Enter your email"
-                            {...field}
-                          />
-                        </div>
+                        <SelectSchoolYear
+                          data={schoolYears}
+                          field={field}
+                          isLoading={isSchoolYearsLoading}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -188,39 +201,18 @@ export function CreateTeacher() {
                 />
                 <FormField
                   control={form.control}
-                  name="password"
+                  name="parent_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm text-school-600 font-medium">
-                        Password
+                        Parent / Guardian
                       </FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            type={passwordVisible ? "text" : "password"}
-                            className="pl-10 focus:ring-ring"
-                            placeholder="Enter your password"
-                            {...field}
-                          />
-                          <Button
-                            type="button"
-                            tabIndex={-1}
-                            className="absolute bg-transparent hover:bg-transparent inset-y-0 right-2 flex items-center text-school-600 hover:text-school-800"
-                            onClick={togglePasswordVisibility}
-                            aria-label={
-                              passwordVisible
-                                ? "Hide password"
-                                : "Show password"
-                            }
-                          >
-                            {passwordVisible ? (
-                              <EyeOff size={18} />
-                            ) : (
-                              <Eye size={18} />
-                            )}
-                          </Button>
-                        </div>
+                        <SelectParent
+                          data={parents}
+                          field={field}
+                          isLoading={isParentsLoading}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -233,7 +225,7 @@ export function CreateTeacher() {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button form="create-teacher" type="submit" disabled={isPending}>
+            <Button form="create-student" type="submit" disabled={isPending}>
               {isPending ? (
                 <div className="flex items-center gap-x-2">
                   <Loader className="animate-spin" /> Adding
@@ -246,5 +238,93 @@ export function CreateTeacher() {
         </DialogContent>
       </form>
     </Dialog>
+  );
+}
+
+type SelectSchoolYearProps = {
+  data?: SchoolYear[] | undefined;
+  field: {
+    value: string;
+    onChange: (value: string) => void;
+  };
+  isLoading: boolean;
+};
+
+function SelectSchoolYear({
+  data = [],
+  field,
+  isLoading,
+}: SelectSchoolYearProps) {
+  // Format school year using date-fns
+  const formatSchoolYear = (startDate: string, endDate: string) => {
+    const startYear = format(new Date(startDate), "yyyy");
+    const endYear = format(new Date(endDate), "yyyy");
+    return `${startYear} - ${endYear}`;
+  };
+  // Find the id of the school year base on field id
+  const selectedSchoolYear = data.find((sy) => sy.id === field.value);
+  //Display the formatted date
+  const selectedDisplayValue = selectedSchoolYear
+    ? formatSchoolYear(
+        selectedSchoolYear.start_date,
+        selectedSchoolYear.end_date
+      )
+    : undefined;
+
+  return (
+    <div className="relative">
+      <CalendarDays className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+      <Select value={field.value} onValueChange={field.onChange}>
+        <SelectTrigger className="pl-10 w-full">
+          <SelectValue placeholder="Select School Year">
+            {selectedDisplayValue}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {isLoading ? (
+            <Loader className="animate-spin" />
+          ) : (
+            data?.map((schoolYear) => (
+              <SelectItem key={schoolYear.id} value={schoolYear.id}>
+                {formatSchoolYear(schoolYear.start_date, schoolYear.end_date)}
+              </SelectItem>
+            ))
+          )}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+type FetchParentsProp = {
+  data?: FetchParentNoPagination[] | undefined;
+  field: {
+    value: string;
+    onChange: (value: string) => void;
+  };
+  isLoading: boolean;
+};
+
+function SelectParent({ data = [], field, isLoading }: FetchParentsProp) {
+  return (
+    <div className="relative">
+      <PersonStanding className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+      <Select value={field.value} onValueChange={field.onChange}>
+        <SelectTrigger className="pl-10 w-full">
+          <SelectValue placeholder="Select Parent" />
+        </SelectTrigger>
+        <SelectContent>
+          {isLoading ? (
+            <Loader className="animate-spin" />
+          ) : (
+            data?.map((parent) => (
+              <SelectItem key={parent.id} value={parent.id}>
+                {parent.first_name} {parent.last_name}
+              </SelectItem>
+            ))
+          )}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
