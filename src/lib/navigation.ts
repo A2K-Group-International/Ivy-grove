@@ -30,6 +30,12 @@ export const menuItems: MenuItem[] = [
     roles: ["admin", "teacher", "parent"],
   },
   {
+    title: "Users",
+    url: "/users",
+    icon: Users,
+    roles: ["admin"],
+  },
+  {
     title: "Teachers",
     url: "/teachers",
     icon: GraduationCap,

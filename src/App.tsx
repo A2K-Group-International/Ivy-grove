@@ -15,6 +15,7 @@ import Teachers from "@/pages/Protected/Teachers";
 import Schedule from "@/pages/Protected/Schedule";
 import Settings from "@/pages/Protected/Settings";
 import { Loader } from "lucide-react";
+import Users from "@/pages/Protected/Users";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,6 +71,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <Overview />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="users"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <Users />
             </ProtectedRoute>
           }
         />

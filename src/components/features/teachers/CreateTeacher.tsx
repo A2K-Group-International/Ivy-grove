@@ -21,7 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Loader, Lock, Mail, User } from "lucide-react";
+import { Eye, EyeOff, Loader, Lock, Mail, PlusIcon, User } from "lucide-react";
 import { useState } from "react";
 import { useCreateTeacher } from "@/hooks/useTeacher";
 
@@ -71,7 +71,9 @@ export function CreateTeacher() {
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
       <form>
         <DialogTrigger asChild>
-          <Button>Add Teacher</Button>
+          <Button>
+            <PlusIcon />
+          </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
