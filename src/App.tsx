@@ -15,6 +15,7 @@ import Teachers from "@/pages/Protected/Teachers";
 import Schedule from "@/pages/Protected/Schedule";
 import Settings from "@/pages/Protected/Settings";
 import { Loader } from "lucide-react";
+import { Toaster } from "@/components/ui/sonner";
 import Users from "@/pages/Protected/Users";
 
 const queryClient = new QueryClient({
@@ -143,6 +144,7 @@ function App() {
       <AuthProvider>
         <Router>
           <AppRoutes />
+          <Toaster />
         </Router>
       </AuthProvider>
     </QueryClientProvider>
