@@ -16,6 +16,7 @@ import Schedule from "@/pages/Protected/Schedule";
 import Settings from "@/pages/Protected/Settings";
 import { Loader } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
+import Announcements from "./pages/Protected/Announcements";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -102,7 +103,7 @@ function AppRoutes() {
           path="announcement"
           element={
             <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
-              <div>Announcement Page</div>
+              <Announcements />
             </ProtectedRoute>
           }
         />
