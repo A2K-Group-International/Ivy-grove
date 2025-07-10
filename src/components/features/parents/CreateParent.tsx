@@ -72,7 +72,7 @@ export function CreateParent() {
       <form>
         <DialogTrigger asChild>
           <Button>
-            <PlusIcon />
+            <PlusIcon /> Add Parent
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">

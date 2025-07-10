@@ -1,4 +1,6 @@
 import { supabase } from "@/lib/supabase";
+import { paginate } from "@/utils/paginate";
+import type { PaginateResult } from "@/types/paginate";
 
 export interface StudentProfile {
   id: string;
@@ -6,7 +8,6 @@ export interface StudentProfile {
   last_name: string;
   age: number;
   school_year_id: string;
-  parent_id: string | null;
 }
 
 export class StudentService {
@@ -17,8 +18,7 @@ export class StudentService {
     first_name: string,
     last_name: string,
     age: number,
-    school_year_id: string,
-    parent_id: string | null
+    school_year_id: string
   ): Promise<StudentProfile> {
     const { data, error } = await supabase
       .from("students")
@@ -27,12 +27,32 @@ export class StudentService {
         last_name,
         age,
         school_year_id,
-        parent_id,
       })
       .select()
       .single();
 
     if (error) throw error;
     return data;
+  }
+
+  /**
+   * Fetch students
+   */
+  static async fetchStudents(
+    page: number = 1,
+    pageSize: number = 10,
+    schoolYearId?: string
+  ): Promise<PaginateResult<StudentProfile>> {
+    return paginate<"students", StudentProfile>({
+      key: "students",
+      page,
+      pageSize,
+      order: [{ column: "created_at", ascending: true }],
+      ...(schoolYearId && {
+        filters: {
+          eq: { column: "school_year_id" as const, value: schoolYearId },
+        },
+      }),
+    });
   }
 }

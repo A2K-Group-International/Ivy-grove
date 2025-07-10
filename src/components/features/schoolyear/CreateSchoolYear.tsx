@@ -136,10 +136,9 @@ export function CreateSchoolYear() {
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          //   disabled={(date) =>
-                          //     date < new Date() || date < new Date("1900-01-01")
-                          //   }
                           captionLayout="dropdown"
+                          startMonth={new Date(2025, 0)}
+                          endMonth={new Date(new Date().getFullYear() + 10, 11)}
                         />
                       </PopoverContent>
                     </Popover>
@@ -177,10 +176,10 @@ export function CreateSchoolYear() {
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          //   disabled={(date) =>
-                          //     date < new Date() || date < new Date("1900-01-01")
-                          //   }
+                          disabled={form.getValues("start_date")}
                           captionLayout="dropdown"
+                          startMonth={form.getValues("start_date")}
+                          endMonth={new Date(new Date().getFullYear() + 10, 11)}
                         />
                       </PopoverContent>
                     </Popover>

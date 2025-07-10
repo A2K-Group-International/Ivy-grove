@@ -6,6 +6,11 @@ export interface SchoolYear {
   end_date: string;
 }
 
+export interface CreateSchoolYear {
+  start_date: string;
+  end_date: string;
+}
+
 export class SchoolYearService {
   /**
    * Create new user school year
@@ -13,7 +18,7 @@ export class SchoolYearService {
   static async createSchoolYear(
     start_date: string,
     end_date: string
-  ): Promise<SchoolYear> {
+  ): Promise<CreateSchoolYear> {
     const { data, error } = await supabase
       .from("school_years")
       .insert({

@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   SchoolYearService,
-  type SchoolYear,
+  type CreateSchoolYear,
 } from "@/services/schoolYear.service";
+import type { SchoolYear } from "@/services/schoolYear.service";
 
 // Query keys for caching
 export const SCHOOL_YEARS_KEY = {
@@ -14,7 +15,9 @@ export function useCreateSchoolYear() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (schoolYear: SchoolYear): Promise<SchoolYear> => {
+    mutationFn: async (
+      schoolYear: CreateSchoolYear
+    ): Promise<CreateSchoolYear> => {
       return SchoolYearService.createSchoolYear(
         schoolYear.start_date,
         schoolYear.end_date

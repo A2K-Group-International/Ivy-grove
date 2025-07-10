@@ -166,7 +166,7 @@ function ActionButtons() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel>Settings</DropdownMenuLabel>
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>Edit</DropdownMenuItem>
         <DropdownMenuItem>Delete</DropdownMenuItem>

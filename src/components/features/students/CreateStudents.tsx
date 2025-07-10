@@ -21,33 +21,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Calendar,
-  CalendarDays,
-  Loader,
-  PersonStanding,
-  PlusIcon,
-  User,
-} from "lucide-react";
+import { Calendar, Loader, PlusIcon, User } from "lucide-react";
 import { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useFetchSchoolYears } from "@/hooks/useSchoolYear";
-import type { SchoolYear } from "@/services/schoolYear.service";
-import { format } from "date-fns";
-import { useFetchParentsNoPagination } from "@/hooks/useParents";
-import type { FetchParentNoPagination } from "@/services/user.service";
 import { useCreateStudent } from "@/hooks/useStudent";
+import { SelectSchoolYear } from "@/components/features/students/SelectSchoolYear";
 
 const createStudentSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
-  parent_id: z.string().min(1, "Parent is required"),
   school_year_id: z.string().min(1, "School Year ID is required"),
   age: z.coerce.number().int().min(1, "Age is required"),
 });
@@ -57,8 +39,6 @@ export function CreateStudents() {
   const { mutate: createStudent, isPending } = useCreateStudent();
   const { data: schoolYears, isLoading: isSchoolYearsLoading } =
     useFetchSchoolYears();
-  const { data: parents, isLoading: isParentsLoading } =
-    useFetchParentsNoPagination();
 
   const form = useForm<z.infer<typeof createStudentSchema>>({
     resolver: zodResolver(createStudentSchema),
@@ -67,7 +47,6 @@ export function CreateStudents() {
       last_name: "",
       age: 0,
       school_year_id: "",
-      parent_id: "",
     },
     mode: "onChange",
   });
@@ -81,7 +60,6 @@ export function CreateStudents() {
         setOpenDialog(false);
       },
     });
-    console.log(values);
   };
 
   return (
@@ -89,7 +67,7 @@ export function CreateStudents() {
       <form>
         <DialogTrigger asChild>
           <Button>
-            <PlusIcon />
+            <PlusIcon /> Add Student
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
@@ -199,25 +177,6 @@ export function CreateStudents() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="parent_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-school-600 font-medium">
-                        Parent / Guardian
-                      </FormLabel>
-                      <FormControl>
-                        <SelectParent
-                          data={parents}
-                          field={field}
-                          isLoading={isParentsLoading}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </form>
             </Form>
           </div>
@@ -238,93 +197,5 @@ export function CreateStudents() {
         </DialogContent>
       </form>
     </Dialog>
-  );
-}
-
-type SelectSchoolYearProps = {
-  data?: SchoolYear[] | undefined;
-  field: {
-    value: string;
-    onChange: (value: string) => void;
-  };
-  isLoading: boolean;
-};
-
-function SelectSchoolYear({
-  data = [],
-  field,
-  isLoading,
-}: SelectSchoolYearProps) {
-  // Format school year using date-fns
-  const formatSchoolYear = (startDate: string, endDate: string) => {
-    const startYear = format(new Date(startDate), "yyyy");
-    const endYear = format(new Date(endDate), "yyyy");
-    return `${startYear} - ${endYear}`;
-  };
-  // Find the id of the school year base on field id
-  const selectedSchoolYear = data.find((sy) => sy.id === field.value);
-  //Display the formatted date
-  const selectedDisplayValue = selectedSchoolYear
-    ? formatSchoolYear(
-        selectedSchoolYear.start_date,
-        selectedSchoolYear.end_date
-      )
-    : undefined;
-
-  return (
-    <div className="relative">
-      <CalendarDays className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-      <Select value={field.value} onValueChange={field.onChange}>
-        <SelectTrigger className="pl-10 w-full">
-          <SelectValue placeholder="Select School Year">
-            {selectedDisplayValue}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {isLoading ? (
-            <Loader className="animate-spin" />
-          ) : (
-            data?.map((schoolYear) => (
-              <SelectItem key={schoolYear.id} value={schoolYear.id}>
-                {formatSchoolYear(schoolYear.start_date, schoolYear.end_date)}
-              </SelectItem>
-            ))
-          )}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
-
-type FetchParentsProp = {
-  data?: FetchParentNoPagination[] | undefined;
-  field: {
-    value: string;
-    onChange: (value: string) => void;
-  };
-  isLoading: boolean;
-};
-
-function SelectParent({ data = [], field, isLoading }: FetchParentsProp) {
-  return (
-    <div className="relative">
-      <PersonStanding className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-      <Select value={field.value} onValueChange={field.onChange}>
-        <SelectTrigger className="pl-10 w-full">
-          <SelectValue placeholder="Select Parent" />
-        </SelectTrigger>
-        <SelectContent>
-          {isLoading ? (
-            <Loader className="animate-spin" />
-          ) : (
-            data?.map((parent) => (
-              <SelectItem key={parent.id} value={parent.id}>
-                {parent.first_name} {parent.last_name}
-              </SelectItem>
-            ))
-          )}
-        </SelectContent>
-      </Select>
-    </div>
   );
 }

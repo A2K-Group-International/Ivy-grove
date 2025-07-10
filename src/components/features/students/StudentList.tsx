@@ -1,7 +1,4 @@
 import { useState } from "react";
-import { useTeachers } from "@/hooks/useTeacher";
-import type { UserProfile } from "@/services/user.service";
-import { capitalizeFirstLetter } from "@/lib/string";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -15,27 +12,30 @@ import {
 import { EllipsisVertical } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
+import { useGetStudents } from "@/hooks/useStudent";
+import type { StudentProfile } from "@/services/students.service";
 
-interface TeacherListProps {
+interface StudentListProps {
   isActive: boolean;
+  schoolYearId?: string;
 }
 
-export function TeacherList({ isActive }: TeacherListProps) {
+export function StudentList({ isActive, schoolYearId }: StudentListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
   const {
-    data: teachers,
+    data: students,
     isLoading,
     error,
-  } = useTeachers(isActive ? currentPage : 1, pageSize);
+  } = useGetStudents(isActive ? currentPage : 1, pageSize, schoolYearId);
 
   if (!isActive) return null;
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-8">
-        <div className="text-school-800">Loading teachers...</div>
+        <div className="text-school-800">Loading students...</div>
       </div>
     );
   }
@@ -44,67 +44,65 @@ export function TeacherList({ isActive }: TeacherListProps) {
     return (
       <div className="flex justify-center items-center py-8">
         <div className="text-red-500">
-          Error loading teachers: {error.message}
+          Error loading students: {error.message}
         </div>
       </div>
     );
   }
 
-  if (!teachers || teachers.items.length === 0) {
+  if (!students || students.items.length === 0) {
     return (
       <div className="flex justify-center items-center py-8">
-        <div className="text-school-800">No teachers found</div>
+        <div className="text-school-800">No students found</div>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {/* Teachers Grid */}
+      {/* student Grid */}
       <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 max-h-dvh">
-        {teachers.items.map((teacher: UserProfile) => (
-          <TeacherCard key={teacher.id} teacher={teacher} />
+        {students.items.map((student: StudentProfile) => (
+          <StudentCard key={student.id} student={student} />
         ))}
       </div>
 
       {/* Pagination */}
-      {teachers.totalPages > 1 && (
+      {students.totalPages > 1 && (
         <Pagination
           currentPage={currentPage}
-          totalPages={teachers.totalPages}
+          totalPages={students.totalPages}
           onPageChange={setCurrentPage}
-          totalItems={teachers.totalItems}
+          totalItems={students.totalItems}
         />
       )}
     </div>
   );
 }
 
-interface TeacherCardProps {
-  teacher: UserProfile;
+interface StudentCardProps {
+  student: StudentProfile;
 }
 
-function TeacherCard({ teacher }: TeacherCardProps) {
+function StudentCard({ student }: StudentCardProps) {
   return (
     <div className="p-4 border rounded-lg hover:shadow-md transition-shadow bg-white">
       <div className="flex gap-x-2 justify-between">
         <div>
           <Avatar className="size-14">
-            <AvatarImage src="https://plus.unsplash.com/premium_photo-1739786996040-32bde1db0610?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" />
+            <AvatarImage src="https://avatar.iran.liara.run/public" />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
         </div>
         <div className="flex-1">
-          <div className="flex gap-x-2 items-center">
+          <div className="flex flex-col">
             <Label className="font-semibold text-lg text-school-700">
-              {teacher.first_name} {teacher.last_name}
+              {student.first_name} {student.last_name}
             </Label>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-school-200 text-school-600">
-              {capitalizeFirstLetter(teacher.role)}
+            <span className="text-gray-500 font-medium text-sm">
+              Age: {student.age}
             </span>
           </div>
-          <Label className="text-sm text-gray-500">{teacher.email}</Label>
-          <Label className="text-sm text-gray-500">{teacher.contact}</Label>
         </div>
         <ActionButtons />
       </div>

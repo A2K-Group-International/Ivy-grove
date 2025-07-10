@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   StudentService,
   type StudentProfile,
@@ -7,6 +7,8 @@ import {
 // Query keys for caching
 export const STUDENT_KEYS = {
   all: ["students"] as const,
+  paginated: (page: number, pageSize: number, schoolYearId?: string) =>
+    ["students", "paginated", page, pageSize, schoolYearId] as const,
   detail: (id: string) => ["school-students", id] as const,
 };
 
@@ -15,7 +17,6 @@ export interface CreateStudentData {
   last_name: string;
   age: number;
   school_year_id: string;
-  parent_id: string;
 }
 
 export function useCreateStudent() {
@@ -29,8 +30,7 @@ export function useCreateStudent() {
         studentData.first_name,
         studentData.last_name,
         studentData.age,
-        studentData.school_year_id,
-        studentData.parent_id
+        studentData.school_year_id
       );
     },
     onSuccess: () => {
@@ -40,5 +40,15 @@ export function useCreateStudent() {
     onError: (error) => {
       console.error("Failed to create stduent:", error);
     },
+  });
+}
+
+//  fetching students with pagination
+export function useGetStudents(page: number = 1, pageSize: number = 10, schoolYearId?: string) {
+  return useQuery({
+    queryKey: STUDENT_KEYS.paginated(page, pageSize, schoolYearId),
+    queryFn: () => StudentService.fetchStudents(page, pageSize, schoolYearId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 }

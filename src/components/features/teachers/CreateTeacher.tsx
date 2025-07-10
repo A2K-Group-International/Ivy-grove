@@ -72,7 +72,7 @@ export function CreateTeacher() {
       <form>
         <DialogTrigger asChild>
           <Button>
-            <PlusIcon />
+            <PlusIcon /> Add Teacher
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">

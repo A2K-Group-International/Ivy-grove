@@ -1,6 +1,5 @@
 import { paginate } from "@/utils/paginate";
 import type { PaginateResult } from "@/types/paginate";
-import { supabase } from "@/lib/supabase";
 
 export type UserRole = "admin" | "teacher" | "parent";
 
@@ -12,12 +11,6 @@ export interface UserProfile {
   role: UserRole;
   contact: string;
   address: string;
-}
-
-export interface FetchParentNoPagination {
-  id: string;
-  first_name: string;
-  last_name: string;
 }
 
 export class UserService {
@@ -55,18 +48,5 @@ export class UserService {
       },
       order: [{ column: "first_name", ascending: true }],
     });
-  }
-
-  /**
-   * Fetch parents without pagination
-   */
-  static async fetchParentsNoPagination(): Promise<FetchParentNoPagination[]> {
-    const { data, error } = await supabase
-      .from("users")
-      .select("id, first_name, last_name")
-      .eq("role", "parent");
-
-    if (error) throw error;
-    return data;
   }
 }

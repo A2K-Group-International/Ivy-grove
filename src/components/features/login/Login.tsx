@@ -57,13 +57,13 @@ const Login = () => {
       navigate("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
-      form.setError("password", { message: "Invalid credentials" });
+      form.setError("root", { message: "Invalid credentials" });
     }
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center p-2">
-      <Card className="w-full max-w-md shadow-lg border-border ">
+    <div className="flex-1 flex items-center justify-center p-2 z-10">
+      <Card className="w-full max-w-md shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
         <CardHeader className="space-y-4 text-center">
           <div className="mx-auto w-24 flex items-center justify-center">
             <img src="/ivy-logo.png" className="w-full h-full bg-contain" />
@@ -144,7 +144,14 @@ const Login = () => {
                   </FormItem>
                 )}
               />
-              <div className="flex items-center justify-end">
+              <div className="flex items-center justify-between">
+                <div>
+                  {form.formState.errors.root && (
+                    <p className="text-red-600 text-sm">
+                      {form.formState.errors.root.message}
+                    </p>
+                  )}
+                </div>
                 <a
                   href="#"
                   className="text-sm text-school-600 hover:text-school-800 hover:underline"
