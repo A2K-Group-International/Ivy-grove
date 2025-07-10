@@ -1,14 +1,14 @@
 import { paginate } from "@/utils/paginate";
 import { supabase } from "@/lib/supabase";
 import type {
-  AnnouncementJoinType,
+  AnnouncementListItem,
   CreateAnnouncementType,
   DeleteAnnouncementType,
   EditAnnouncementType,
   FetchAnnouncementsType,
   FileData,
 } from "@/types/announcements";
-import type { PaginateResult } from "@/types/paginate";
+import type { PaginateResult } from "@/types/utils";
 
 /**
  * Creates a new announcement and uploads associated files to Supabase storage.
@@ -27,14 +27,17 @@ export const createAnnouncements = async ({
 }: CreateAnnouncementType) => {
   const fileData: FileData[] = [];
 
+  console.log("Creating announcement with files:", files);
+
   if (files) {
+    const filesArray = Array.isArray(files) ? files : [files];
     await Promise.all(
-      files.map(async (file) => {
+      filesArray.map(async (file) => {
         const fileName = `${file.name.split(".")[0]}-${Date.now()}`;
         const fileExt = file.name.split(".")[1];
 
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("Uroboros")
+          .from("uploads")
           .upload(`announcement/${fileName}.${fileExt}`, file);
 
         if (uploadError) {
@@ -58,7 +61,7 @@ export const createAnnouncements = async ({
         content: content,
         visibility: groupId ? "private" : "public",
         group_id: groupId ?? null,
-        created_by: created_by,
+        created_by: created_by as string,
       },
     ])
     .select("id")
@@ -85,7 +88,9 @@ export const createAnnouncements = async ({
   return fetchData;
 };
 
-export const fetchSingleAnnouncement = async (announcementId: string) => {
+export const fetchSingleAnnouncement = async (
+  announcementId: string | undefined | null
+) => {
   try {
     if (!announcementId) {
       throw new Error(
@@ -114,7 +119,7 @@ export const fetchSingleAnnouncement = async (announcementId: string) => {
       ...announcement,
       announcement_files: announcement.announcement_files.map((file) => ({
         ...file,
-        url: supabase.storage.from("Uroboros").getPublicUrl(file.url).data
+        url: supabase.storage.from("uploads").getPublicUrl(file.url).data
           .publicUrl,
       })),
     };
@@ -155,7 +160,7 @@ export const fetchAnnouncements = async ({
   page,
   pageSize,
   groupId,
-}: FetchAnnouncementsType): Promise<PaginateResult<AnnouncementJoinType>> => {
+}: FetchAnnouncementsType): Promise<PaginateResult<AnnouncementListItem>> => {
   try {
     const select =
       "*, users(first_name,last_name,role), announcement_files(url,name,type)";
@@ -169,8 +174,7 @@ export const fetchAnnouncements = async ({
       query.visibility = "public";
     }
 
-    // Specify the return type explicitly with AnnouncementJoinType
-    const paginatedData = await paginate<"announcements", AnnouncementJoinType>(
+    const paginatedData = await paginate<"announcements", AnnouncementListItem>(
       {
         key: "announcements",
         page,
@@ -182,16 +186,30 @@ export const fetchAnnouncements = async ({
       }
     );
 
-    const typedItems = paginatedData.items as AnnouncementJoinType[];
+    const typedItems = paginatedData.items as AnnouncementListItem[];
 
-    const transformedItems = typedItems.map((item) => ({
-      ...item,
-      announcement_files: item.announcement_files.map((file) => ({
-        ...file,
-        url: supabase.storage.from("Uroboros").getPublicUrl(file.url).data
-          .publicUrl,
-      })),
-    }));
+    const transformedItems = await Promise.all(
+      typedItems.map(async (item) => ({
+        ...item,
+        announcement_files: await Promise.all(
+          item.announcement_files.map(async (file) => {
+            const { data, error } = await supabase.storage
+              .from("uploads")
+              .createSignedUrl(file.url, 60 * 60);
+
+            if (error || !data?.signedUrl) {
+              console.error("Error generating signed URL:", error);
+              return { ...file, url: file.url };
+            }
+
+            return {
+              ...file,
+              url: data.signedUrl,
+            };
+          })
+        ),
+      }))
+    );
 
     return {
       ...paginatedData,
@@ -231,6 +249,9 @@ export const editAnnouncement = async ({
   files,
   announcementId,
 }: EditAnnouncementType) => {
+  if (!announcementId) {
+    throw new Error("Announcement ID is required for editing.");
+  }
   const { data: existingFiles, error } = await supabase
     .from("announcement_files")
     .select("id,name,url")
@@ -241,16 +262,18 @@ export const editAnnouncement = async ({
   }
 
   // Delete files that are not in the new data.files array
-  const filesToDelete = existingFiles.filter(
-    (existingFile) => !files?.some((file) => file.name === existingFile.name)
-  );
+  const filesToDelete = existingFiles.filter((existingFile) => {
+    if (!files) return true;
+    const filesArray = Array.isArray(files) ? files : [files];
+    return !filesArray.some((file) => file.name === existingFile.name);
+  });
 
   if (filesToDelete.length > 0) {
     const fileIdsToDelete = filesToDelete.map((file) => file.id);
     const filePathToDelete = filesToDelete.map((file) => file.url);
 
     const { error: storageError } = await supabase.storage
-      .from("Uroboros")
+      .from("uploads")
       .remove(filePathToDelete);
 
     if (storageError) {
@@ -270,12 +293,13 @@ export const editAnnouncement = async ({
   let fileData: FileData[] = [];
   // Upload new or updated files using their original name
   if (files) {
+    const filesArray = Array.isArray(files) ? files : [files];
     fileData = await Promise.all(
-      files.map(async (file) => {
+      filesArray.map(async (file) => {
         const fileName = file.name;
 
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("Uroboros")
+          .from("uploads")
           .upload(`announcement/${fileName}`, file, { upsert: true });
 
         if (uploadError) {
@@ -359,7 +383,7 @@ export const deleteAnnouncement = async ({
       const decodedUrl = decodeURIComponent(publicUrl);
       const urlParts = new URL(decodedUrl);
       const path = urlParts.pathname.split(
-        "/storage/v1/object/public/Uroboros/"
+        "/storage/v1/object/public/uploads/"
       )[1];
 
       if (!path) {
@@ -396,7 +420,7 @@ export const deleteAnnouncement = async ({
   // Proceed with file deletion only if urls are valid
   if (urls && urls.length > 0) {
     const { error: storageError } = await supabase.storage
-      .from("Uroboros")
+      .from("uploads")
       .remove(urls); // Remove files correctly
 
     if (storageError) {
@@ -452,7 +476,7 @@ export const deleteAnnouncement = async ({
 //   data.announcement.announcement_files =
 //     data.announcement.announcement_files.map((file) => ({
 //       ...file,
-//       url: supabase.storage.from("Uroboros").getPublicUrl(file.url).data
+//       url: supabase.storage.from("uploads").getPublicUrl(file.url).data
 //         .publicUrl,
 //     }));
 

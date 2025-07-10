@@ -1,9 +1,13 @@
-import type {
-  ColumnName,
-  ColumnValue,
-  TableColumns,
-  TableName,
-} from "./database";
+import type { Database } from "./database";
+
+export type TableName = keyof Database["public"]["Tables"];
+type ColumnName<T extends TableName> =
+  keyof Database["public"]["Tables"][T]["Row"];
+type ColumnValue<
+  T extends TableName,
+  C extends ColumnName<T>
+> = Database["public"]["Tables"][T]["Row"][C];
+type TableColumns<T extends TableName> = Database["public"]["Tables"][T]["Row"];
 
 interface PaginateParams<T extends TableName> {
   key: T;
@@ -45,4 +49,10 @@ interface PaginateResult<T> {
   totalItems: number;
 }
 
-export type { PaginateParams, PaginateResult };
+type ImageLoaderType = {
+  src: string;
+  alt?: string;
+  className?: string;
+};
+
+export type { PaginateParams, PaginateResult, ImageLoaderType };
