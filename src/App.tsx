@@ -17,6 +17,9 @@ import { Toaster } from "@/components/ui/sonner";
 import Users from "@/pages/Protected/Users";
 import SchoolYear from "@/pages/Protected/SchoolYear";
 import Announcements from "./pages/Protected/Announcements";
+import Attendance from "./pages/Protected/Attendance";
+import Classes from "./pages/Protected/Classses";
+import ClassStudents from "./pages/Protected/ClassStudents";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -100,6 +103,14 @@ function AppRoutes() {
           }
         />
         <Route
+          path="attendance"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "teacher"]}>
+              <Attendance />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="announcement"
           element={
             <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
@@ -112,6 +123,22 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
               <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="school-year/:id/classes"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
+              <Classes />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="school-year/:id/classes/:classId/students"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
+              <ClassStudents />
             </ProtectedRoute>
           }
         />

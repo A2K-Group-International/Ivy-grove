@@ -10,8 +10,8 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)";
-  };
+    PostgrestVersion: "12.2.3 (519615d)"
+  }
   public: {
     Tables: {
       announcement_files: {
@@ -100,6 +100,96 @@ export type Database = {
           },
         ]
       }
+      attendance: {
+        Row: {
+          date: string
+          id: string
+        }
+        Insert: {
+          date: string
+          id?: string
+        }
+        Update: {
+          date?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      attendance_students: {
+        Row: {
+          attendance_id: string | null
+          class_id: string
+          id: string
+          student_id: string
+          time_in: string | null
+          time_out: string | null
+        }
+        Insert: {
+          attendance_id?: string | null
+          class_id: string
+          id?: string
+          student_id: string
+          time_in?: string | null
+          time_out?: string | null
+        }
+        Update: {
+          attendance_id?: string | null
+          class_id?: string
+          id?: string
+          student_id?: string
+          time_in?: string | null
+          time_out?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_students_attendance_id_fkey"
+            columns: ["attendance_id"]
+            isOneToOne: false
+            referencedRelation: "attendance"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_students_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_students_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classes: {
+        Row: {
+          id: string
+          name: string
+          school_year_id: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          school_year_id: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          school_year_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classes_school_year_id_fkey"
+            columns: ["school_year_id"]
+            isOneToOne: false
+            referencedRelation: "school_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       groups: {
         Row: {
           created_at: string | null
@@ -158,6 +248,7 @@ export type Database = {
       }
       students: {
         Row: {
+          address: string
           age: number
           created_at: string
           first_name: string
@@ -167,6 +258,7 @@ export type Database = {
           school_year_id: string
         }
         Insert: {
+          address: string
           age: number
           created_at?: string
           first_name: string
@@ -176,6 +268,7 @@ export type Database = {
           school_year_id: string
         }
         Update: {
+          address?: string
           age?: number
           created_at?: string
           first_name?: string

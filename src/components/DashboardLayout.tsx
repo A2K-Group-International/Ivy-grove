@@ -61,7 +61,7 @@ export function DashboardLayout() {
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
-                        isActive={location.pathname === item.url}
+                        isActive={location.pathname.includes(item.url)}
                       >
                         <Link
                           to={item.url}

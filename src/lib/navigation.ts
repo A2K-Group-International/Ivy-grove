@@ -6,6 +6,7 @@ import {
   type LucideIcon,
   School,
   Megaphone,
+  List,
 } from "lucide-react";
 import type { UserRole } from "@/context/AuthContext";
 
@@ -46,6 +47,12 @@ export const menuItems: MenuItem[] = [
     title: "Schedule",
     url: "/schedule",
     icon: UserCheck,
+    roles: ["admin", "teacher"],
+  },
+  {
+    title: "Attendance",
+    url: "/attendance",
+    icon: List,
     roles: ["admin", "teacher"],
   },
 
