@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth, type UserRole } from "@/context/AuthContext";
+import { Loader } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,12 +11,12 @@ export const ProtectedRoute = ({
   children,
   allowedRoles,
 }: ProtectedRouteProps) => {
-  const { user, userRole, initializing } = useAuth();
+  const { user, userRole, initializing, loading } = useAuth();
 
-  if (initializing) {
+  if (initializing || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+        <Loader className="animate-spin" />
       </div>
     );
   }
@@ -31,9 +32,9 @@ export const ProtectedRoute = ({
       case "admin":
         return <Navigate to="/dashboard" replace />;
       case "teacher":
-        return <Navigate to="/teacher-dashboard" replace />;
+        return <Navigate to="/announcement" replace />;
       case "parent":
-        return <Navigate to="/parent-dashboard" replace />;
+        return <Navigate to="/announcement" replace />;
       default:
         return <Navigate to="/" replace />;
     }
