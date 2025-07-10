@@ -10,7 +10,6 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import Landing from "@/pages/Landing";
 import Overview from "@/pages/Protected/Overview";
-import Schedule from "@/pages/Protected/Schedule";
 import Settings from "@/pages/Protected/Settings";
 import { Loader } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
@@ -18,7 +17,7 @@ import Users from "@/pages/Protected/Users";
 import SchoolYear from "@/pages/Protected/SchoolYear";
 import Announcements from "./pages/Protected/Announcements";
 import Attendance from "./pages/Protected/Attendance";
-import Classes from "./pages/Protected/Classses";
+import Classes from "./pages/Protected/Classes";
 import ClassStudents from "./pages/Protected/ClassStudents";
 
 const queryClient = new QueryClient({
@@ -91,14 +90,6 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <SchoolYear />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="schedule"
-          element={
-            <ProtectedRoute allowedRoles={["admin", "teacher"]}>
-              <Schedule />
             </ProtectedRoute>
           }
         />

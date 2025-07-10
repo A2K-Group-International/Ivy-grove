@@ -8,6 +8,7 @@ export interface StudentProfile {
   last_name: string;
   age: number;
   school_year_id: string;
+  address: string;
 }
 
 export class StudentService {
@@ -26,8 +27,8 @@ export class StudentService {
       .insert({
         first_name,
         last_name,
-        address,
         age,
+        address,
         school_year_id,
       })
       .select()

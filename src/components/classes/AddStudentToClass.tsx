@@ -82,7 +82,10 @@ const AddStudentToClass = () => {
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
               name="ids"
@@ -110,17 +113,10 @@ const AddStudentToClass = () => {
               )}
             />
             <DialogFooter>
-              <DialogClose
-                type="button"
-                className="border-1 border-school-600 flex-1 rounded-3xl cursor-pointer"
-              >
-                Close
+              <DialogClose type="button" asChild>
+                <Button variant="secondary">Close</Button>
               </DialogClose>
-              <Button
-                type="submit"
-                className="bg-school-600 text-white flex-1"
-                disabled={addStudentMutation.isPending}
-              >
+              <Button type="submit" disabled={addStudentMutation.isPending}>
                 {addStudentMutation.isPending ? "Creating..." : "Create Class"}
               </Button>
             </DialogFooter>

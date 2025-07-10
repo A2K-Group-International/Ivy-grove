@@ -1,4 +1,3 @@
-import AddClassForm from "@/components/classes/AddClassForm";
 import {
   Card,
   //   CardContent,
@@ -9,21 +8,20 @@ import {
 } from "@/components/ui/card";
 import { fetchAllClasses } from "@/services/class.service";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
 
-const Classses = () => {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+type SchoolYearIdProp = {
+  schoolYearId: string;
+};
 
+const Classses = ({ schoolYearId }: SchoolYearIdProp) => {
   const {
     data: classes,
     isLoading,
     error,
     isError,
   } = useQuery({
-    queryKey: ["classes", id],
-    queryFn: () => fetchAllClasses(id),
+    queryKey: ["classes", schoolYearId],
+    queryFn: () => fetchAllClasses(schoolYearId),
   });
 
   if (isError) {
@@ -31,24 +29,8 @@ const Classses = () => {
     return <p className="text-red-500">Failed to load classes.</p>;
   }
 
-  const handleBack = () => {
-    navigate(-1);
-  };
-
-  const handleNavigation = (classId: string) => {
-    navigate(`/school-year/${id}/classes/${classId}/students`);
-  };
-
   return (
-    <div>
-      <div className="flex justify-between mb-5">
-        <div className="flex items-center gap-2">
-          <ArrowLeft onClick={handleBack} className="cursor-pointer" />
-          <h2 className="text-2xl font-bold text-gray-900">Classes</h2>
-        </div>
-        <AddClassForm />
-      </div>
-
+    <>
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
           <span className="text-gray-500">Loading...</span>
@@ -56,11 +38,7 @@ const Classses = () => {
       ) : classes && classes.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {classes.map((cls) => (
-            <Card
-              onClick={() => handleNavigation(cls.id)}
-              key={cls.id}
-              className="w-full cursor-pointer"
-            >
+            <Card key={cls.id} className="w-full cursor-pointer">
               <CardHeader>
                 <CardTitle>{cls.name}</CardTitle>
                 {/* <CardDescription>
@@ -82,7 +60,7 @@ const Classses = () => {
       ) : (
         <p className="text-gray-500">No classes found.</p>
       )}
-    </div>
+    </>
   );
 };
 

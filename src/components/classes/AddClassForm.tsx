@@ -23,9 +23,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useParams } from "react-router-dom";
 import { addClass } from "@/services/class.service";
 import { useState } from "react";
+import { PlusIcon } from "lucide-react";
 
 const addClassSchema = z.object({
   className: z.string().min(1, "Class name is required"),
@@ -33,10 +33,13 @@ const addClassSchema = z.object({
 
 type addClassType = z.infer<typeof addClassSchema>;
 
-const AddClassForm = () => {
+type SchoolYearIdProp = {
+  schoolYearId: string;
+};
+
+const AddClassForm = ({ schoolYearId }: SchoolYearIdProp) => {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
-  const { id } = useParams<{ id: string }>();
   const form = useForm<addClassType>({
     resolver: zodResolver(addClassSchema),
     defaultValues: {
@@ -58,7 +61,7 @@ const AddClassForm = () => {
     onSettled: () => {
       form.reset();
       queryClient.invalidateQueries({
-        queryKey: ["classes", id],
+        queryKey: ["classes", schoolYearId],
       });
       setOpen(false);
     },
@@ -66,7 +69,7 @@ const AddClassForm = () => {
 
   const handleSubmit = (data: addClassType) => {
     createClassMutation.mutate({
-      schoolYearId: id,
+      schoolYearId: schoolYearId,
       className: data.className,
     });
   };
@@ -74,7 +77,9 @@ const AddClassForm = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Create New Class</Button>
+        <Button>
+          <PlusIcon /> Add Class
+        </Button>
       </DialogTrigger>
 
       <DialogContent>
@@ -84,7 +89,6 @@ const AddClassForm = () => {
             Fill in the details to create a new class.
           </DialogDescription>
         </DialogHeader>
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)}>
             <FormField

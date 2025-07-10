@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth, type UserRole } from "@/context/AuthContext";
-import { Loader } from "lucide-react";
+import Loading from "@/components/Loading";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -14,11 +14,7 @@ export const ProtectedRoute = ({
   const { user, userRole, initializing, loading } = useAuth();
 
   if (initializing || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader className="animate-spin" />
-      </div>
-    );
+    return <Loading />;
   }
 
   if (!user) {

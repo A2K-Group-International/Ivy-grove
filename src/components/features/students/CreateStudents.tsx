@@ -21,24 +21,24 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Calendar, Loader, PlusIcon, User } from "lucide-react";
+import { Calendar, Loader, Locate, PlusIcon, User } from "lucide-react";
 import { useState } from "react";
-import { useFetchSchoolYears } from "@/hooks/useSchoolYear";
 import { useCreateStudent } from "@/hooks/useStudent";
-import { SelectSchoolYear } from "@/components/features/students/SelectSchoolYear";
 
 const createStudentSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
-  school_year_id: z.string().min(1, "School Year ID is required"),
   age: z.coerce.number().int().min(1, "Age is required"),
+  address: z.string().min(1, "Address is required"),
 });
 
-export function CreateStudents() {
+type SchoolYearProps = {
+  schoolYearId: string;
+};
+
+export function CreateStudents({ schoolYearId }: SchoolYearProps) {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const { mutate: createStudent, isPending } = useCreateStudent();
-  const { data: schoolYears, isLoading: isSchoolYearsLoading } =
-    useFetchSchoolYears();
 
   const form = useForm<z.infer<typeof createStudentSchema>>({
     resolver: zodResolver(createStudentSchema),
@@ -46,20 +46,26 @@ export function CreateStudents() {
       first_name: "",
       last_name: "",
       age: 0,
-      school_year_id: "",
+      address: "",
     },
     mode: "onChange",
   });
 
-  const handleCreateTeacher = async (
+  const handleCreateStudent = async (
     values: z.infer<typeof createStudentSchema>
   ) => {
-    createStudent(values, {
-      onSuccess: () => {
-        form.reset();
-        setOpenDialog(false);
+    createStudent(
+      {
+        ...values,
+        school_year_id: schoolYearId,
       },
-    });
+      {
+        onSuccess: () => {
+          form.reset();
+          setOpenDialog(false);
+        },
+      }
+    );
   };
 
   return (
@@ -81,7 +87,7 @@ export function CreateStudents() {
           <div className="grid gap-4">
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(handleCreateTeacher)}
+                onSubmit={form.handleSubmit(handleCreateStudent)}
                 id="create-student"
                 className="space-y-2"
               >
@@ -160,18 +166,22 @@ export function CreateStudents() {
 
                 <FormField
                   control={form.control}
-                  name="school_year_id"
+                  name="address"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm text-school-600 font-medium">
-                        School Year
+                        Address
                       </FormLabel>
                       <FormControl>
-                        <SelectSchoolYear
-                          data={schoolYears}
-                          field={field}
-                          isLoading={isSchoolYearsLoading}
-                        />
+                        <div className="relative">
+                          <Locate className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            type="text"
+                            className="pl-10 focus:ring-ring"
+                            placeholder="Address"
+                            {...field}
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -21,7 +21,7 @@ const Announcements = () => {
 
   const { ref } = useInterObserver(fetchNextPage);
 
-  if (!userProfile) return <Loading />;
+  if (!userProfile || isLoading) return <Loading />;
 
   return (
     <div className="flex h-full w-full flex-col ">
@@ -48,7 +48,6 @@ const Announcements = () => {
                 first_name={userProfile?.first_name}
               />
             )}
-            {isLoading && <Loading />}
 
             {data?.pages?.flatMap((page) => page.items).length === 0 ? (
               <div className="text-center py-12">

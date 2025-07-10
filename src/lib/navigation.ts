@@ -1,7 +1,6 @@
 import {
   Home,
   Users,
-  UserCheck,
   Baby,
   type LucideIcon,
   School,
@@ -42,12 +41,6 @@ export const menuItems: MenuItem[] = [
     url: "/school-year",
     icon: School,
     roles: ["admin"],
-  },
-  {
-    title: "Schedule",
-    url: "/schedule",
-    icon: UserCheck,
-    roles: ["admin", "teacher"],
   },
   {
     title: "Attendance",

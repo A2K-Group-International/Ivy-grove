@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import type { StudentProfile } from "@/services/students.service";
 
 export const addClass = async ({
   schoolYearId,
@@ -59,7 +60,7 @@ export const addStudentToClass = async ({
   if (!classId || studentIds.length === 0) {
     throw new Error("Class ID and student IDs are required");
   }
-  const { error } = await supabase.from("attendance_students").insert(
+  const { error } = await supabase.from("class_students").insert(
     studentIds.map((studentId) => ({
       class_id: classId,
       student_id: studentId,
@@ -84,4 +85,34 @@ export const fetchAllClasses = async (schoolYearId: string | undefined) => {
   }
 
   return data;
+};
+
+export const fetchStudentsPerClass = async (
+  classId: string
+): Promise<StudentProfile[]> => {
+  if (!classId) {
+    throw new Error("Class ID is required");
+  }
+  const { data, error } = await supabase
+    .from("class_students")
+    .select(
+      "id, class_id, student_id(id, first_name, last_name, age,address , school_year_id)"
+    )
+    .eq("class_id", classId)
+    .order("class_id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return (
+    data?.map((item) => ({
+      id: item.student_id.id,
+      first_name: item.student_id.first_name,
+      last_name: item.student_id.last_name,
+      age: item.student_id.age,
+      address: item.student_id.address,
+      school_year_id: item.student_id.school_year_id,
+    })) ?? []
+  );
 };
