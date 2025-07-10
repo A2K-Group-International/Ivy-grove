@@ -61,7 +61,7 @@ export function DashboardLayout() {
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
-                        isActive={location.pathname === item.url}
+                        isActive={location.pathname.includes(item.url)}
                       >
                         <Link
                           to={item.url}
@@ -102,7 +102,7 @@ export function DashboardLayout() {
           </SidebarFooter>
         </Sidebar>
         <main className="flex-1 overflow-hidden">
-          <div className="flex h-full flex-col">
+          <div className="flex h-dvh flex-col">
             <div className="flex items-center justify-end md:justify-start border-b gap-2 p-4">
               <div>
                 <SidebarTrigger />

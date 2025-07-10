@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from "react";
 import { useInView } from "react-intersection-observer";
 
-const useInterObserver = (callback: ()=> void) => {
+const useInterObserver = (callback: () => void) => {
   const { ref, inView } = useInView({
     threshold: 0.1,
     triggerOnce: false,

@@ -16,6 +16,7 @@ export interface CreateStudentData {
   first_name: string;
   last_name: string;
   age: number;
+  address: string;
   school_year_id: string;
 }
 
@@ -30,6 +31,7 @@ export function useCreateStudent() {
         studentData.first_name,
         studentData.last_name,
         studentData.age,
+        studentData.address,
         studentData.school_year_id
       );
     },
@@ -44,7 +46,11 @@ export function useCreateStudent() {
 }
 
 //  fetching students with pagination
-export function useGetStudents(page: number = 1, pageSize: number = 10, schoolYearId?: string) {
+export function useGetStudents(
+  page: number = 1,
+  pageSize: number = 10,
+  schoolYearId?: string
+) {
   return useQuery({
     queryKey: STUDENT_KEYS.paginated(page, pageSize, schoolYearId),
     queryFn: () => StudentService.fetchStudents(page, pageSize, schoolYearId),

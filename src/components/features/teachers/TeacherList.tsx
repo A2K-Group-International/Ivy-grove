@@ -24,21 +24,12 @@ export function TeacherList({ isActive }: TeacherListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  const {
-    data: teachers,
-    isLoading,
-    error,
-  } = useTeachers(isActive ? currentPage : 1, pageSize);
+  const { data: teachers, error } = useTeachers(
+    isActive ? currentPage : 1,
+    pageSize
+  );
 
   if (!isActive) return null;
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-8">
-        <div className="text-school-800">Loading teachers...</div>
-      </div>
-    );
-  }
 
   if (error) {
     return (

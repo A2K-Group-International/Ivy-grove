@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
-import type { TableName, Tables } from "@/types/database";
-import type { PaginateParams, PaginateResult } from "@/types/utils";
+import type { Tables } from "@/types/database";
+import type { PaginateParams, PaginateResult, TableName } from "@/types/utils";
 
 export const paginate = async <T extends TableName, R = Tables<T>>({
   key,

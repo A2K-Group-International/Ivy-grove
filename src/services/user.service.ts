@@ -1,5 +1,5 @@
 import { paginate } from "@/utils/paginate";
-import type { PaginateResult } from "@/types/paginate";
+import type { PaginateResult } from "@/types/utils";
 
 export type UserRole = "admin" | "teacher" | "parent";
 

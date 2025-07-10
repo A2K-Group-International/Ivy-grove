@@ -10,13 +10,15 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import Landing from "@/pages/Landing";
 import Overview from "@/pages/Protected/Overview";
-import Schedule from "@/pages/Protected/Schedule";
 import Settings from "@/pages/Protected/Settings";
 import { Loader } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import Users from "@/pages/Protected/Users";
 import SchoolYear from "@/pages/Protected/SchoolYear";
 import Announcements from "./pages/Protected/Announcements";
+import Attendance from "./pages/Protected/Attendance";
+import Classes from "./pages/Protected/Classes";
+import ClassStudents from "./pages/Protected/ClassStudents";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -92,10 +94,10 @@ function AppRoutes() {
           }
         />
         <Route
-          path="schedule"
+          path="attendance"
           element={
             <ProtectedRoute allowedRoles={["admin", "teacher"]}>
-              <Schedule />
+              <Attendance />
             </ProtectedRoute>
           }
         />
@@ -112,6 +114,22 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
               <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="school-year/:id/classes"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
+              <Classes />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="school-year/:id/classes/:classId/students"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
+              <ClassStudents />
             </ProtectedRoute>
           }
         />
