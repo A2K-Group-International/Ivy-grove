@@ -109,8 +109,7 @@ export function DashboardLayout() {
                 <div className="flex-1" />
               </div>
             </div>
-
-            <div className="flex-1 overflow-auto p-6">
+            <div className="flex-1 overflow-auto p-2 md:p-6">
               <Outlet />
             </div>
           </div>

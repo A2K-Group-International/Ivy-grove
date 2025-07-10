@@ -21,45 +21,40 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Loader, Lock, Mail, PlusIcon, User } from "lucide-react";
+import { Calendar, Loader, PlusIcon, User } from "lucide-react";
 import { useState } from "react";
-import { useCreateTeacher } from "@/hooks/useTeacher";
+import { useFetchSchoolYears } from "@/hooks/useSchoolYear";
+import { useCreateStudent } from "@/hooks/useStudent";
+import { SelectSchoolYear } from "@/components/features/students/SelectSchoolYear";
 
-const createTeacherSchema = z.object({
+const createStudentSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
-  contact: z
-    .string()
-    .length(11, "Contact must be exactly 11 digits")
-    .regex(/^\d+$/, "Contact must contain only numbers"),
-  email: z.string().email("Email must be valid"),
-  password: z.string().min(6, "Password must be at least 6 characters."),
+  school_year_id: z.string().min(1, "School Year ID is required"),
+  age: z.coerce.number().int().min(1, "Age is required"),
 });
 
-export function CreateTeacher() {
+export function CreateStudents() {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
-  const { mutate: createTeacher, isPending } = useCreateTeacher();
+  const { mutate: createStudent, isPending } = useCreateStudent();
+  const { data: schoolYears, isLoading: isSchoolYearsLoading } =
+    useFetchSchoolYears();
 
-  const form = useForm({
-    resolver: zodResolver(createTeacherSchema),
+  const form = useForm<z.infer<typeof createStudentSchema>>({
+    resolver: zodResolver(createStudentSchema),
     defaultValues: {
       first_name: "",
       last_name: "",
-      contact: "",
-      email: "",
-      password: "",
+      age: 0,
+      school_year_id: "",
     },
+    mode: "onChange",
   });
 
-  const togglePasswordVisibility = () => {
-    setPasswordVisible((prevState) => !prevState);
-  };
-
   const handleCreateTeacher = async (
-    values: z.infer<typeof createTeacherSchema>
+    values: z.infer<typeof createStudentSchema>
   ) => {
-    createTeacher(values, {
+    createStudent(values, {
       onSuccess: () => {
         form.reset();
         setOpenDialog(false);
@@ -72,22 +67,22 @@ export function CreateTeacher() {
       <form>
         <DialogTrigger asChild>
           <Button>
-            <PlusIcon /> Add Teacher
+            <PlusIcon /> Add Student
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Add teacher</DialogTitle>
+            <DialogTitle>Add Student</DialogTitle>
             <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
-              done.
+              Fill out the student details below to register a new student. Once
+              completed, click Save to add them to the system.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(handleCreateTeacher)}
-                id="create-teacher"
+                id="create-student"
                 className="space-y-2"
               >
                 <div className="flex flex-col md:flex-row gap-x-2">
@@ -141,19 +136,19 @@ export function CreateTeacher() {
 
                 <FormField
                   control={form.control}
-                  name="contact"
+                  name="age"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm text-school-600 font-medium">
-                        Contact
+                        Age
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Input
-                            type="text"
+                            type="number"
                             className="pl-10 focus:ring-ring"
-                            placeholder="Contact No."
+                            placeholder="Age"
                             {...field}
                           />
                         </div>
@@ -165,62 +160,18 @@ export function CreateTeacher() {
 
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="school_year_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm text-school-600 font-medium">
-                        Email
+                        School Year
                       </FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            type="email"
-                            className="pl-10 focus:ring-ring"
-                            placeholder="Enter your email"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-school-600 font-medium">
-                        Password
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            type={passwordVisible ? "text" : "password"}
-                            className="pl-10 focus:ring-ring"
-                            placeholder="Enter your password"
-                            {...field}
-                          />
-                          <Button
-                            type="button"
-                            tabIndex={-1}
-                            className="absolute bg-transparent hover:bg-transparent inset-y-0 right-2 flex items-center text-school-600 hover:text-school-800"
-                            onClick={togglePasswordVisibility}
-                            aria-label={
-                              passwordVisible
-                                ? "Hide password"
-                                : "Show password"
-                            }
-                          >
-                            {passwordVisible ? (
-                              <EyeOff size={18} />
-                            ) : (
-                              <Eye size={18} />
-                            )}
-                          </Button>
-                        </div>
+                        <SelectSchoolYear
+                          data={schoolYears}
+                          field={field}
+                          isLoading={isSchoolYearsLoading}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -233,7 +184,7 @@ export function CreateTeacher() {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button form="create-teacher" type="submit" disabled={isPending}>
+            <Button form="create-student" type="submit" disabled={isPending}>
               {isPending ? (
                 <div className="flex items-center gap-x-2">
                   <Loader className="animate-spin" /> Adding

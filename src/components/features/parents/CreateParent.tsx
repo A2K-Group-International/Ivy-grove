@@ -23,9 +23,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, Loader, Lock, Mail, PlusIcon, User } from "lucide-react";
 import { useState } from "react";
-import { useCreateTeacher } from "@/hooks/useTeacher";
+import { useCreateParent } from "@/hooks/useParents";
 
-const createTeacherSchema = z.object({
+const createParentSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
   contact: z
@@ -36,13 +36,13 @@ const createTeacherSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters."),
 });
 
-export function CreateTeacher() {
+export function CreateParent() {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
-  const { mutate: createTeacher, isPending } = useCreateTeacher();
+  const { mutate: createParent, isPending } = useCreateParent();
 
   const form = useForm({
-    resolver: zodResolver(createTeacherSchema),
+    resolver: zodResolver(createParentSchema),
     defaultValues: {
       first_name: "",
       last_name: "",
@@ -56,10 +56,10 @@ export function CreateTeacher() {
     setPasswordVisible((prevState) => !prevState);
   };
 
-  const handleCreateTeacher = async (
-    values: z.infer<typeof createTeacherSchema>
+  const handleCreateParent = async (
+    values: z.infer<typeof createParentSchema>
   ) => {
-    createTeacher(values, {
+    createParent(values, {
       onSuccess: () => {
         form.reset();
         setOpenDialog(false);
@@ -72,12 +72,12 @@ export function CreateTeacher() {
       <form>
         <DialogTrigger asChild>
           <Button>
-            <PlusIcon /> Add Teacher
+            <PlusIcon /> Add Parent
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Add teacher</DialogTitle>
+            <DialogTitle>Add Parent</DialogTitle>
             <DialogDescription>
               Make changes to your profile here. Click save when you&apos;re
               done.
@@ -86,9 +86,9 @@ export function CreateTeacher() {
           <div className="grid gap-4">
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(handleCreateTeacher)}
-                id="create-teacher"
-                className="space-y-2"
+                onSubmit={form.handleSubmit(handleCreateParent)}
+                id="create-parent"
+                className=""
               >
                 <div className="flex flex-col md:flex-row gap-x-2">
                   <FormField
@@ -162,7 +162,6 @@ export function CreateTeacher() {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="email"
@@ -233,7 +232,7 @@ export function CreateTeacher() {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button form="create-teacher" type="submit" disabled={isPending}>
+            <Button form="create-parent" type="submit" disabled={isPending}>
               {isPending ? (
                 <div className="flex items-center gap-x-2">
                   <Loader className="animate-spin" /> Adding

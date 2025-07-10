@@ -10,8 +10,6 @@ export interface UserProfile {
   last_name: string;
   role: UserRole;
   contact: string;
-  created_at: string;
-  updated_at: string;
 }
 
 export class AuthService {
@@ -75,7 +73,7 @@ export class AuthService {
   }
 
   /**
-   * Fetch user profile and role
+   * Fetch all user profile
    */
   static async fetchUserProfile(id: string): Promise<UserProfile | null> {
     try {
@@ -112,17 +110,19 @@ export class AuthService {
       .insert({
         id,
         email,
-        contact,
         first_name,
         last_name,
+        contact,
         role,
       })
+      .select()
       .single();
 
     if (error) throw error;
     return data;
   }
 
+  // Create teacher
   static async createTeacher(
     email: string,
     password: string,
@@ -161,6 +161,48 @@ export class AuthService {
       return profile;
     } catch (error) {
       console.error("Error creating teacher:", error);
+      throw error;
+    }
+  }
+
+  static async createParent(
+    email: string,
+    password: string,
+    contact: string,
+    first_name: string,
+    last_name: string
+  ): Promise<UserProfile> {
+    try {
+      // Sign up user
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error("Supabase signUp error:", {
+          message: error.message,
+          details: error,
+        });
+        throw error;
+      }
+
+      if (!data?.user?.id) {
+        throw new Error("User id  is not found");
+      }
+
+      const profile = await this.createAccount(
+        data.user.id,
+        email,
+        first_name,
+        last_name,
+        contact,
+        "parent" // role
+      );
+
+      return profile;
+    } catch (error) {
+      console.error("Error creating parent:", error);
       throw error;
     }
   }
