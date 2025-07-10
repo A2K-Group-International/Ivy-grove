@@ -14,12 +14,9 @@ import Schedule from "@/pages/Protected/Schedule";
 import Settings from "@/pages/Protected/Settings";
 import { Loader } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
-<<<<<<< HEAD
-import Announcements from "./pages/Protected/Announcements";
-=======
 import Users from "@/pages/Protected/Users";
 import SchoolYear from "@/pages/Protected/SchoolYear";
->>>>>>> origin/staging
+import Announcements from "./pages/Protected/Announcements";
 
 const queryClient = new QueryClient({
   defaultOptions: {
