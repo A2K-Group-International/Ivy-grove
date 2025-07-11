@@ -78,3 +78,19 @@ export const fetchStudentsNoPaginate = async (
 
   return data as StudentProfile[];
 };
+
+export const fetchStudentsBySchoolYear = async () => {
+  const today = new Date().toISOString().split("T")[0];
+
+  const { data, error } = await supabase
+    .from("school_years")
+    .select("id,students(*,attendance(*))")
+    .gte("end_date", today)
+    .lte("start_date", today);
+
+  if (error) {
+    throw new Error(`Failed to fetch students: ${error.message}`);
+  }
+
+  return data;
+};

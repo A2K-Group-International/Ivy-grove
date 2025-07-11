@@ -87,6 +87,24 @@ export const fetchAllClasses = async (schoolYearId: string | undefined) => {
   return data;
 };
 
+export const fetchClassBySchoolYear = async () => {
+  const now = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from("school_years")
+    .select("*, classes(*)")
+    .gte("end_date", now)
+    .lte("start_date", now)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(
+      `Failed to fetch classes by school year ID: ${error.message}`
+    );
+  }
+  return data?.classes ?? [];
+};
+
 export const fetchStudentsPerClass = async (
   classId: string
 ): Promise<StudentProfile[]> => {
@@ -115,4 +133,28 @@ export const fetchStudentsPerClass = async (
       school_year_id: item.student_id.school_year_id,
     })) ?? []
   );
+};
+
+export const fetchStudentsByClassWithStatus = async (
+  classId: string | null
+) => {
+  if (!classId) {
+    throw new Error("Class ID is required");
+  }
+
+  const { data, error } = await supabase
+    .from("class_students")
+    .select(
+      "*, attendance(time_in, time_out), students(id, first_name, last_name)"
+    )
+    .eq("class_id", classId)
+    .eq("attendance.date", new Date().toISOString());
+
+  if (error) {
+    throw new Error(
+      `Failed to fetch students by class status: ${error.message}`
+    );
+  }
+
+  return data;
 };

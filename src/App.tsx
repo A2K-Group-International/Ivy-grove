@@ -117,14 +117,14 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        <Route
+        {/* <Route
           path="school-year/:id/classes"
           element={
             <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
               <Classes />
             </ProtectedRoute>
           }
-        />
+        /> */}
         <Route
           path="school-year/:id/classes/:classId/students"
           element={
