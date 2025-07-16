@@ -44,3 +44,28 @@ export const timeOutStudent = async (class_student_id: string | undefined, selec
     throw new Error(`Failed to mark time out: ${error.message}`);
   }
 };
+
+export const updateAttendanceTime = async (
+  attendanceId: string,
+  timeType: 'time_in' | 'time_out',
+  newTime: string
+) => {
+  if (!attendanceId) {
+    throw new Error("Attendance ID is required");
+  }
+
+  if (!newTime) {
+    throw new Error("Time is required");
+  }
+
+  const { error } = await supabase
+    .from("attendance")
+    .update({
+      [timeType]: newTime,
+    })
+    .eq("id", attendanceId);
+
+  if (error) {
+    throw new Error(`Failed to update ${timeType}: ${error.message}`);
+  }
+};

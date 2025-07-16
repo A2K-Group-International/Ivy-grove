@@ -3,6 +3,7 @@ type Student = {
   id: string;
   student_id: string;
   attendance: {
+    id: string;
     time_in: string | null;
     time_out: string | null;
   }[];

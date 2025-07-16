@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { attendStudent, timeOutStudent } from "@/services/attendance.service";
+import { attendStudent, timeOutStudent, updateAttendanceTime } from "@/services/attendance.service";
 import { toast } from "sonner";
 import { useState } from "react";
 import { formatDateForSupabase } from "@/lib/utils";
@@ -69,6 +69,29 @@ export const useAttendanceActions = (classId: string, date?: Date) => {
     timeOutMutation.mutate(studentId);
   };
 
+  const timeEditMutation = useMutation({
+    mutationFn: ({ attendanceId, timeType, newTime }: { 
+      attendanceId: string; 
+      timeType: 'time_in' | 'time_out'; 
+      newTime: string 
+    }) => updateAttendanceTime(attendanceId, timeType, newTime),
+    onSuccess: () => {
+      toast("Time updated successfully!");
+      queryClient.invalidateQueries({
+        queryKey: ["students", classId, dateString],
+      });
+    },
+    onError: (error) => {
+      toast(`Error updating time: ${error.message}`, {
+        className: "bg-red-500 text-white",
+      });
+    },
+  });
+
+  const handleTimeEdit = (attendanceId: string, timeType: 'time_in' | 'time_out', newTime: string) => {
+    timeEditMutation.mutate({ attendanceId, timeType, newTime });
+  };
+
   const isStudentLoading = (studentId: string) => {
     return loadingStudents.has(studentId);
   };
@@ -76,6 +99,7 @@ export const useAttendanceActions = (classId: string, date?: Date) => {
   return {
     handleCheckIn,
     handleCheckOut,
+    handleTimeEdit,
     isStudentLoading,
   };
 };

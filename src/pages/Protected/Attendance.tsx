@@ -2,7 +2,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { CalendarIcon, QrCode, Search } from "lucide-react";
 
-import AddStudentForm from "@/components/attendance/AddStudentForm";
+// import AddStudentForm from "@/components/attendance/AddStudentForm";
 import StudentCard from "@/components/attendance/StudentCard";
 import AttendanceStats from "@/components/attendance/AttendanceStats";
 import ErrorMessage from "@/components/ErrorMessage";
@@ -34,9 +34,10 @@ import { useClassData } from "@/hooks/attendance/useClassData";
 import { useClassSelection } from "@/hooks/attendance/useClassSelection";
 
 const Attendance = () => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const { classId, setClassId } = useClassSelection();
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // State for the date
+  const { classId, setClassId } = useClassSelection(); // Class ID on params
 
+  // Fetch classes
   const {
     data: classes,
     isLoading: classLoading,
@@ -44,6 +45,7 @@ const Attendance = () => {
     error: classError,
   } = useClassData();
 
+  // Fetch the students base on class id and selected date for Attendance
   const {
     data: students,
     isLoading,
@@ -51,7 +53,7 @@ const Attendance = () => {
     error,
   } = useAttendanceData(classId, selectedDate);
 
-  const { handleCheckIn, handleCheckOut, isStudentLoading } =
+  const { handleCheckIn, handleCheckOut, handleTimeEdit, isStudentLoading } =
     useAttendanceActions(classId, selectedDate);
 
   return (
@@ -81,6 +83,7 @@ const Attendance = () => {
                 mode="single"
                 selected={selectedDate}
                 onSelect={(date) => date && setSelectedDate(date)}
+                disabled={(date) => date > new Date()}
               />
             </PopoverContent>
           </Popover>
@@ -113,7 +116,7 @@ const Attendance = () => {
         </div>
 
         <div className="flex gap-2">
-          <AddStudentForm />
+          {/* <AddStudentForm /> */}
           <Button>
             <QrCode />
           </Button>
@@ -161,6 +164,7 @@ const Attendance = () => {
               student={student}
               onCheckIn={handleCheckIn}
               onCheckOut={handleCheckOut}
+              onTimeEdit={handleTimeEdit}
               isStudentLoading={isStudentLoading}
             />
           ))

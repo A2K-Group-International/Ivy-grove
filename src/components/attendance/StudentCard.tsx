@@ -10,11 +10,17 @@ const StudentCard = ({
   student,
   onCheckIn,
   onCheckOut,
+  onTimeEdit,
   isStudentLoading,
 }: {
   student: Student;
   onCheckIn: (id: string) => void;
   onCheckOut: (id: string) => void;
+  onTimeEdit: (
+    attendanceId: string,
+    timeType: "time_in" | "time_out",
+    newTime: string
+  ) => void;
   isStudentLoading: (id: string) => boolean;
 }) => {
   const timeIn = student.attendance[0]?.time_in;
@@ -43,7 +49,10 @@ const StudentCard = ({
           <div className="font-medium text-gray-900">
             {student.students.first_name} {student.students.last_name}
           </div>
-          <StudentTimeInfo attendance={student.attendance} />
+          <StudentTimeInfo
+            attendance={student.attendance}
+            onTimeEdit={onTimeEdit}
+          />
         </div>
       </div>
 
