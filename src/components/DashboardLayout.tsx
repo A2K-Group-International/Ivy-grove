@@ -46,7 +46,7 @@ export function DashboardLayout() {
             <div className="flex flex-col justify-center items-center gap-3 px-4 py-6">
               <div className="w-20 h-20 flex items-center justify-center bg-school-50 rounded-full border-2 border-school-200 shadow-sm">
                 <img
-                  src="/ivy-logo.png"
+                  src="/Ivy-logo.png"
                   className="w-16 h-16 object-contain"
                   alt="Ivy Grove Logo"
                 />

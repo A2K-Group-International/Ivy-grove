@@ -66,7 +66,7 @@ const Login = () => {
       <Card className="w-full max-w-md shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
         <CardHeader className="space-y-4 text-center">
           <div className="mx-auto w-24 flex items-center justify-center">
-            <img src="/ivy-logo.png" className="w-full h-full bg-contain" />
+            <img src="/Ivy-logo.png" className="w-full h-full bg-contain" />
           </div>
           <div className="space-y-1">
             <CardTitle className="text-2xl font-bold text-school-600">
