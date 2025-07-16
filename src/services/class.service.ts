@@ -137,11 +137,18 @@ export const fetchStudentsPerClass = async (
 };
 
 export const fetchStudentsByClassWithStatus = async (
-  classId: string | null
+  classId: string | null,
+  date?: string
 ) => {
   if (!classId) {
     throw new Error("Class ID is required");
   }
+
+  const targetDate = date || new Date().toISOString().split('T')[0];
+  
+  // Create start and end of day for proper timestamptz filtering
+  const startOfDay = `${targetDate}T00:00:00.000Z`;
+  const endOfDay = `${targetDate}T23:59:59.999Z`;
 
   const { data, error } = await supabase
     .from("class_students")
@@ -149,7 +156,8 @@ export const fetchStudentsByClassWithStatus = async (
       "*, attendance(time_in, time_out), students(id, first_name, last_name)"
     )
     .eq("class_id", classId)
-    .eq("attendance.date", new Date().toISOString());
+    .gte("attendance.date", startOfDay)
+    .lte("attendance.date", endOfDay);
 
   if (error) {
     throw new Error(

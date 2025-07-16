@@ -15,6 +15,8 @@ import {
 import { EllipsisVertical } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
+import { EditTeacher } from "./EditTeacher";
+import { DeleteTeacher } from "./DeleteTeacher";
 
 interface TeacherListProps {
   isActive: boolean;
@@ -76,6 +78,9 @@ interface TeacherCardProps {
 }
 
 function TeacherCard({ teacher }: TeacherCardProps) {
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
   return (
     <div className="p-4 border rounded-lg hover:shadow-md transition-shadow bg-white">
       <div className="flex gap-x-2 justify-between">
@@ -97,8 +102,22 @@ function TeacherCard({ teacher }: TeacherCardProps) {
           <Label className="text-sm text-gray-500">{teacher.email}</Label>
           <Label className="text-sm text-gray-500">{teacher.contact}</Label>
         </div>
-        <ActionButtons />
+        <ActionButtons
+          onEdit={() => setEditOpen(true)}
+          onDelete={() => setDeleteOpen(true)}
+        />
       </div>
+
+      <EditTeacher
+        teacher={teacher}
+        isOpen={editOpen}
+        onClose={() => setEditOpen(false)}
+      />
+      <DeleteTeacher
+        teacher={teacher}
+        isOpen={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+      />
     </div>
   );
 }
@@ -110,7 +129,12 @@ interface PaginationProps {
   totalItems: number;
 }
 
-function ActionButtons() {
+interface ActionButtonsProps {
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+function ActionButtons({ onEdit, onDelete }: ActionButtonsProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -121,8 +145,8 @@ function ActionButtons() {
       <DropdownMenuContent>
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Edit</DropdownMenuItem>
-        <DropdownMenuItem>Delete</DropdownMenuItem>
+        <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
+        <DropdownMenuItem onClick={onDelete}>Delete</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

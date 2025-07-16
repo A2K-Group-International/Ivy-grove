@@ -40,7 +40,7 @@ export function DashboardLayout() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-gray-50">
+      <div className="flex h-dvh w-full bg-gray-50">
         <Sidebar className="sidebar-enhanced">
           <SidebarHeader className="border-b border-gray-200">
             <div className="flex flex-col justify-center items-center gap-3 px-4 py-6">
@@ -127,7 +127,7 @@ export function DashboardLayout() {
           </SidebarFooter>
         </Sidebar>
         <main className="flex-1 overflow-hidden bg-gray-50">
-          <div className="flex h-screen flex-col">
+          <div className="flex h-dvh flex-col">
             <div className="flex items-center justify-between border-b border-gray-200 bg-white shadow-sm px-4 py-3 lg:px-6">
               <div className="flex items-center gap-3">
                 <SidebarTrigger />
@@ -138,7 +138,7 @@ export function DashboardLayout() {
                 </div>
               </div>
             </div>
-            <div className="flex-1 overflow-auto container-responsive py-6">
+            <div className="flex-1 overflow-scroll p-6">
               <Outlet />
             </div>
           </div>

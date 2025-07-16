@@ -11,7 +11,7 @@ export interface UserProfile {
   last_name: string;
   role: UserRole;
   contact: string;
-  address: string | null;
+  address: string;
 }
 
 export interface FetchParentNoPagination {
@@ -142,8 +142,7 @@ export class UserService {
     first_name: string,
     last_name: string,
     contact: string,
-    email: string,
-    address?: string
+    address: string
   ): Promise<UserProfile> {
     // update the user
     const { data, error } = await supabase
@@ -152,8 +151,7 @@ export class UserService {
         first_name,
         last_name,
         contact,
-        email,
-        address: address || null,
+        address: address,
       })
       .eq("id", id)
       .select()
@@ -226,5 +224,48 @@ export class UserService {
 
     if (error) throw error;
     return data || [];
+  }
+
+  /**
+   * Update teacher information
+   */
+  static async updateTeacher(
+    id: string,
+    first_name: string,
+    last_name: string,
+    contact: string,
+    address: string
+  ): Promise<UserProfile> {
+    const { data, error } = await supabase
+      .from("users")
+      .update({
+        first_name,
+        last_name,
+        contact,
+        address,
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Update error:", error);
+      throw new Error(`Failed to update teacher: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error("No data returned from update operation");
+    }
+
+    return data;
+  }
+
+  /**
+   * Delete teacher
+   */
+  static async deleteTeacher(id: string): Promise<void> {
+    const { error } = await supabase.from("users").delete().eq("id", id);
+
+    if (error) throw error;
   }
 }

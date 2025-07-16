@@ -21,7 +21,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Loader, Lock, Mail, PlusIcon, User } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Loader,
+  Lock,
+  Mail,
+  MapPin,
+  PlusIcon,
+  User,
+} from "lucide-react";
 import { useState } from "react";
 import { useCreateParent } from "@/hooks/useParents";
 
@@ -34,6 +43,7 @@ const createParentSchema = z.object({
     .regex(/^\d+$/, "Contact must contain only numbers"),
   email: z.string().email("Email must be valid"),
   password: z.string().min(6, "Password must be at least 6 characters."),
+  address: z.string().min(1, "Address is required"),
 });
 
 export function CreateParent() {
@@ -49,6 +59,7 @@ export function CreateParent() {
       contact: "",
       email: "",
       password: "",
+      address: "",
     },
   });
 
@@ -154,6 +165,29 @@ export function CreateParent() {
                             type="text"
                             className="pl-10 focus:ring-ring"
                             placeholder="Contact No."
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm text-school-600 font-medium">
+                        Address
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            type="text"
+                            className="pl-10 focus:ring-ring"
+                            placeholder="Address"
                             {...field}
                           />
                         </div>

@@ -29,3 +29,8 @@ export const formatTime = (date: Date | string) => {
   };
   return new Date(date).toLocaleTimeString(undefined, options);
 };
+
+export const formatDateForSupabase = (date: Date | string) => {
+  const dateObj = new Date(date);
+  return dateObj.toISOString().split('T')[0];
+};

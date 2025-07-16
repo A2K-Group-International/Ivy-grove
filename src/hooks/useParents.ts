@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AuthService, type UserProfile } from "@/services/auth.service";
+import { AuthService } from "@/services/auth.service";
 import {
   UserService,
+  type UserProfile,
   type FetchParentNoPagination,
 } from "@/services/user.service";
 
@@ -20,6 +21,7 @@ export interface CreateParentData {
   contact: string;
   first_name: string;
   last_name: string;
+  address: string;
 }
 
 //  fetching users with pagination
@@ -42,7 +44,8 @@ export function useCreateParent() {
         parentData.password,
         parentData.contact,
         parentData.first_name,
-        parentData.last_name
+        parentData.last_name,
+        parentData.address
       );
     },
     onSuccess: () => {
@@ -85,23 +88,20 @@ export function useUpdateParent() {
       first_name,
       last_name,
       contact,
-      email,
       address,
     }: {
       id: string;
       first_name: string;
       last_name: string;
       contact: string;
-      email: string;
-      address?: string | null;
+      address: string;
     }): Promise<UserProfile> => {
       return UserService.updateParent(
         id,
         first_name,
         last_name,
         contact,
-        email,
-        address ?? undefined
+        address
       );
     },
     onSuccess: () => {

@@ -10,6 +10,7 @@ export interface UserProfile {
   last_name: string;
   role: UserRole;
   contact: string;
+  address: string;
 }
 
 export class AuthService {
@@ -103,6 +104,7 @@ export class AuthService {
     first_name: string,
     last_name: string,
     contact: string,
+    address: string,
     role: UserRole
   ): Promise<UserProfile> {
     const { data, error } = await supabase
@@ -113,6 +115,7 @@ export class AuthService {
         first_name,
         last_name,
         contact,
+        address,
         role,
       })
       .select()
@@ -128,7 +131,8 @@ export class AuthService {
     password: string,
     contact: string,
     first_name: string,
-    last_name: string
+    last_name: string,
+    address: string
   ): Promise<UserProfile> {
     try {
       // Sign up user
@@ -155,6 +159,7 @@ export class AuthService {
         first_name,
         last_name,
         contact,
+        address,
         "teacher" // role
       );
 
@@ -170,7 +175,8 @@ export class AuthService {
     password: string,
     contact: string,
     first_name: string,
-    last_name: string
+    last_name: string,
+    address: string
   ): Promise<UserProfile> {
     try {
       // Sign up user
@@ -197,6 +203,7 @@ export class AuthService {
         first_name,
         last_name,
         contact,
+        address,
         "parent" // role
       );
 

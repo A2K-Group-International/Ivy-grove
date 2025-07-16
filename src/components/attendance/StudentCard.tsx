@@ -10,14 +10,12 @@ const StudentCard = ({
   student,
   onCheckIn,
   onCheckOut,
-  isCheckingIn,
-  isCheckingOut,
+  isStudentLoading,
 }: {
   student: Student;
   onCheckIn: (id: string) => void;
   onCheckOut: (id: string) => void;
-  isCheckingIn: boolean;
-  isCheckingOut: boolean;
+  isStudentLoading: (id: string) => boolean;
 }) => {
   const timeIn = student.attendance[0]?.time_in;
   const timeOut = student.attendance[0]?.time_out;
@@ -32,7 +30,7 @@ const StudentCard = ({
   };
 
   return (
-    <div className="flex items-center justify-between p-4 rounded-lg border bg-white hover:shadow-sm transition-all duration-200">
+    <div className="flex flex-col md:flex-row md:justify-between gap-y-2 p-4 rounded-lg border bg-white hover:shadow-sm transition-all duration-200">
       <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10">
           <AvatarImage src={"/placeholder.svg"} />
@@ -55,12 +53,12 @@ const StudentCard = ({
           {!timeIn && (
             <Button
               onClick={() => onCheckIn(student.id)}
-              disabled={isCheckingIn}
+              disabled={isStudentLoading(student.id)}
               size="sm"
               className="flex items-center gap-1"
             >
               <LogIn className="h-4 w-4" />
-              {isCheckingIn ? "Checking In..." : "Check In"}
+              {isStudentLoading(student.id) ? "Checking In..." : "Check In"}
             </Button>
           )}
 
@@ -68,11 +66,11 @@ const StudentCard = ({
             <Button
               onClick={() => onCheckOut(student.id)}
               size="sm"
-              disabled={isCheckingOut}
+              disabled={isStudentLoading(student.id)}
               className="flex items-center gap-1"
             >
               <LogOut className="h-4 w-4" />
-              {isCheckingOut ? "Checking Out..." : "Check Out"}
+              {isStudentLoading(student.id) ? "Checking Out..." : "Check Out"}
             </Button>
           )}
         </div>

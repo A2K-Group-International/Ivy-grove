@@ -21,10 +21,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Home, Loader, Mail, User } from "lucide-react";
-import { useUpdateParent } from "@/hooks/useParents";
+import { useUpdateTeacher } from "@/hooks/useTeacher";
 import type { UserProfile } from "@/services/user.service";
 
-const editParentSchema = z.object({
+const editTeacherSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
   contact: z
@@ -34,31 +34,31 @@ const editParentSchema = z.object({
   address: z.string().min(1, "Address is required"),
 });
 
-interface EditParentProps {
-  parent: UserProfile;
+interface EditTeacherProps {
+  teacher: UserProfile;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function EditParent({ parent, isOpen, onClose }: EditParentProps) {
-  const { mutate: updateParent, isPending } = useUpdateParent();
+export function EditTeacher({ teacher, isOpen, onClose }: EditTeacherProps) {
+  const { mutate: updateTeacher, isPending } = useUpdateTeacher();
 
   const form = useForm({
-    resolver: zodResolver(editParentSchema),
+    resolver: zodResolver(editTeacherSchema),
     defaultValues: {
-      first_name: parent.first_name,
-      last_name: parent.last_name,
-      contact: parent.contact,
-      address: parent.address,
+      first_name: teacher.first_name,
+      last_name: teacher.last_name,
+      contact: teacher.contact,
+      address: teacher.address,
     },
   });
 
-  const handleUpdateParent = async (
-    values: z.infer<typeof editParentSchema>
+  const handleUpdateTeacher = async (
+    values: z.infer<typeof editTeacherSchema>
   ) => {
-    updateParent(
+    updateTeacher(
       {
-        id: parent.id,
+        id: teacher.id,
         first_name: values.first_name,
         last_name: values.last_name,
         contact: values.contact,
@@ -69,7 +69,7 @@ export function EditParent({ parent, isOpen, onClose }: EditParentProps) {
           onClose();
         },
         onError: (error) => {
-          console.error("Failed to update parent:", error);
+          console.error("Failed to update teacher:", error);
         },
       }
     );
@@ -79,16 +79,16 @@ export function EditParent({ parent, isOpen, onClose }: EditParentProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Parent</DialogTitle>
+          <DialogTitle>Edit Teacher</DialogTitle>
           <DialogDescription>
-            Update the parent's information. Click save when you're done.
+            Update the teacher's information. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4">
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(handleUpdateParent)}
-              id="edit-parent"
+              onSubmit={form.handleSubmit(handleUpdateTeacher)}
+              id="edit-teacher"
               className="space-y-4"
             >
               <div className="flex flex-col md:flex-row gap-x-2 gap-y-4">
@@ -194,7 +194,7 @@ export function EditParent({ parent, isOpen, onClose }: EditParentProps) {
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button form="edit-parent" type="submit" disabled={isPending}>
+          <Button form="edit-teacher" type="submit" disabled={isPending}>
             {isPending ? (
               <div className="flex items-center gap-x-2">
                 <Loader className="animate-spin" /> Updating

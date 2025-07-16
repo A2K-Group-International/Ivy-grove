@@ -1,17 +1,22 @@
+import { useState } from "react";
+import { format } from "date-fns";
+import { CalendarIcon, QrCode, Search } from "lucide-react";
+
 import AddStudentForm from "@/components/attendance/AddStudentForm";
 import StudentCard from "@/components/attendance/StudentCard";
+import AttendanceStats from "@/components/attendance/AttendanceStats";
 import ErrorMessage from "@/components/ErrorMessage";
 import AttendanceStatsSkeleton from "@/components/skeletons.tsx/AttendanceStatsSkeleton";
 import StudentsListSkeleton from "@/components/skeletons.tsx/StudentsListSkeleton";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAttendanceActions } from "@/hooks/attendance/useAttendanceActions";
-import { useAttendanceData } from "@/hooks/attendance/useAttendanceData";
-import { useClassData } from "@/hooks/attendance/useClassData";
-import { useClassSelection } from "@/hooks/attendance/useClassSelection";
-import { formatDate } from "@/lib/utils";
-import { QrCode, Search } from "lucide-react";
-
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -21,92 +26,126 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import AttendanceStats from "@/components/attendance/AttendanceStats";
+
+import { cn } from "@/lib/utils";
+import { useAttendanceActions } from "@/hooks/attendance/useAttendanceActions";
+import { useAttendanceData } from "@/hooks/attendance/useAttendanceData";
+import { useClassData } from "@/hooks/attendance/useClassData";
+import { useClassSelection } from "@/hooks/attendance/useClassSelection";
 
 const Attendance = () => {
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const { classId, setClassId } = useClassSelection();
+
   const {
     data: classes,
     isLoading: classLoading,
     isError: classIsError,
     error: classError,
   } = useClassData();
+
   const {
     data: students,
     isLoading,
     isError,
     error,
-  } = useAttendanceData(classId);
-  const { handleCheckIn, handleCheckOut, isCheckingIn, isCheckingOut } =
-    useAttendanceActions(classId);
+  } = useAttendanceData(classId, selectedDate);
+
+  const { handleCheckIn, handleCheckOut, isStudentLoading } =
+    useAttendanceActions(classId, selectedDate);
 
   return (
-    <div className="flex h-full ">
-      <div className="flex-1">
-        <div className="mb-6">
-          <div className="flex justify-between">
-            <div className="flex gap-2">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {formatDate(new Date().toLocaleDateString())}
-              </h2>
-              <Select
-                onValueChange={setClassId}
-                value={classId}
-                disabled={isLoading}
+    <>
+      {/* Top Controls */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-4">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "justify-start text-left font-normal w-[200px]",
+                  !selectedDate && "text-muted-foreground"
+                )}
               >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select a class" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Classes</SelectLabel>
-                    {classes && classes.length > 0 ? (
-                      classes.map((classItem) => (
-                        <SelectItem key={classItem.id} value={classItem.id}>
-                          {classItem.name}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="no-classes" disabled>
-                        No classes available
-                      </SelectItem>
-                    )}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <AddStudentForm />
-              <Button>
-                <QrCode />
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {selectedDate ? (
+                  format(selectedDate, "PPP")
+                ) : (
+                  <span>Pick a date</span>
+                )}
               </Button>
-            </div>
-          </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => date && setSelectedDate(date)}
+              />
+            </PopoverContent>
+          </Popover>
 
-          {/* Attendance Stats */}
-          {classLoading ? (
-            <AttendanceStatsSkeleton />
-          ) : classIsError ? (
-            <ErrorMessage
-              message={`Error loading classes: ${classError?.message}`}
-            />
-          ) : students ? (
-            <AttendanceStats students={students} />
-          ) : (
-            <AttendanceStatsSkeleton />
-          )}
-
-          {/* Search Bar */}
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search students by name, ID, or email..."
-              className="pl-10"
-            />
-          </div>
+          <Select
+            onValueChange={setClassId}
+            value={classId}
+            disabled={isLoading}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select a class" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Classes</SelectLabel>
+                {classes && classes.length > 0 ? (
+                  classes.map((classItem) => (
+                    <SelectItem key={classItem.id} value={classItem.id}>
+                      {classItem.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="no-classes" disabled>
+                    No classes available
+                  </SelectItem>
+                )}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Students List */}
+        <div className="flex gap-2">
+          <AddStudentForm />
+          <Button>
+            <QrCode />
+          </Button>
+        </div>
+      </div>
+
+      {/* Attendance Stats */}
+      <div className="mb-4">
+        {classLoading ? (
+          <AttendanceStatsSkeleton />
+        ) : classIsError ? (
+          <ErrorMessage
+            message={`Error loading classes: ${classError?.message}`}
+          />
+        ) : students ? (
+          <AttendanceStats students={students} />
+        ) : (
+          <AttendanceStatsSkeleton />
+        )}
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Input
+          placeholder="Search students by name, ID, or email..."
+          className="pl-10"
+        />
+      </div>
+
+      {/* Scrollable Student List */}
+      <div className="flex-1 overflow-y-auto space-y-2">
         {!classId ? (
           <div className="text-center py-8 text-gray-500">
             Please select a class to view students
@@ -116,25 +155,22 @@ const Attendance = () => {
         ) : isError ? (
           <ErrorMessage message={`Error loading students: ${error?.message}`} />
         ) : students && students.length > 0 ? (
-          <div className="space-y-2">
-            {students.map((student) => (
-              <StudentCard
-                key={student.id}
-                student={student}
-                onCheckIn={handleCheckIn}
-                onCheckOut={handleCheckOut}
-                isCheckingIn={isCheckingIn}
-                isCheckingOut={isCheckingOut}
-              />
-            ))}
-          </div>
+          students.map((student) => (
+            <StudentCard
+              key={student.id}
+              student={student}
+              onCheckIn={handleCheckIn}
+              onCheckOut={handleCheckOut}
+              isStudentLoading={isStudentLoading}
+            />
+          ))
         ) : (
           <div className="text-center py-8 text-gray-500">
             No students found for this class
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AuthService, type UserProfile } from "@/services/auth.service";
-import { UserService } from "@/services/user.service";
+import { AuthService } from "@/services/auth.service";
+import { UserService, type UserProfile } from "@/services/user.service";
 
 // Query keys for caching
 export const TEACHER_KEYS = {
@@ -17,6 +17,7 @@ export interface CreateTeacherData {
   contact: string;
   first_name: string;
   last_name: string;
+  address: string;
 }
 
 //  fetching teachers with pagination
@@ -41,7 +42,8 @@ export function useCreateTeacher() {
         teacherData.password,
         teacherData.contact,
         teacherData.first_name,
-        teacherData.last_name
+        teacherData.last_name,
+        teacherData.address
       );
     },
     onSuccess: () => {
@@ -52,6 +54,52 @@ export function useCreateTeacher() {
     },
     onError: (error) => {
       console.error("Failed to create teacher:", error);
+    },
+  });
+}
+
+export function useUpdateTeacher() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      first_name,
+      last_name,
+      contact,
+      address,
+    }: {
+      id: string;
+      first_name: string;
+      last_name: string;
+      contact: string;
+      address: string;
+    }): Promise<UserProfile> => {
+      return UserService.updateTeacher(
+        id,
+        first_name,
+        last_name,
+        contact,
+        address
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: TEACHER_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: ["teachers", "paginated"] });
+    },
+  });
+}
+
+export function useDeleteTeacher() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string): Promise<void> => {
+      return UserService.deleteTeacher(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: TEACHER_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: ["teachers", "paginated"] });
     },
   });
 }
