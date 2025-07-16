@@ -1,6 +1,7 @@
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { checkStudentExists } from "@/services/studentValidation.service";
 import {
   Form,
   FormControl,
@@ -24,12 +25,22 @@ import { Input } from "@/components/ui/input";
 import { Calendar, Loader, Locate, PlusIcon, User } from "lucide-react";
 import { useState } from "react";
 import { useCreateStudent } from "@/hooks/useStudent";
+import { toast } from "sonner";
 
 const createStudentSchema = z.object({
-  first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().min(1, "Last name is required"),
-  age: z.coerce.number().int().min(1, "Age is required"),
-  address: z.string().min(1, "Address is required"),
+  first_name: z
+    .string()
+    .min(1, "First name is required")
+    .max(50, "First name must be less than 50 characters"),
+  last_name: z
+    .string()
+    .min(1, "Last name is required")
+    .max(50, "Last name must be less than 50 characters"),
+  age: z.coerce.number().int().min(1, "Age must be at least 1"),
+  address: z
+    .string()
+    .min(1, "Address is required")
+    .max(200, "Address must be less than 200 characters"),
 });
 
 type SchoolYearProps = {
@@ -54,18 +65,40 @@ export function CreateStudents({ schoolYearId }: SchoolYearProps) {
   const handleCreateStudent = async (
     values: z.infer<typeof createStudentSchema>
   ) => {
-    createStudent(
-      {
-        ...values,
-        school_year_id: schoolYearId,
-      },
-      {
-        onSuccess: () => {
-          form.reset();
-          setOpenDialog(false);
-        },
+    try {
+      // Check for duplicate students before creating
+      const exists = await checkStudentExists(
+        values.first_name,
+        values.last_name,
+        schoolYearId
+      );
+
+      if (exists) {
+        toast.warning(
+          `Student "${values.first_name} ${values.last_name}" already exists in this school year`
+        );
+        return;
       }
-    );
+
+      createStudent(
+        {
+          ...values,
+          school_year_id: schoolYearId,
+        },
+        {
+          onSuccess: () => {
+            form.reset();
+            setOpenDialog(false);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error checking student uniqueness:", error);
+      form.setError("first_name", {
+        type: "manual",
+        message: "Error validating student. Please try again.",
+      });
+    }
   };
 
   return (

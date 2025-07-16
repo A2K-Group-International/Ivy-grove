@@ -3,7 +3,7 @@ import Announcement from "@/components/announcements/Announcement";
 import useInterObserver from "@/hooks/useInterObserver";
 import Loading from "@/components/Loading";
 import AnnouncementHeader from "@/components/announcements/AnnouncementHeader";
-import AnnouncementModal from "@/components/announcements/AnnouncementModal";
+// import AnnouncementModal from "@/components/announcements/AnnouncementModal";
 import useAnnouncements from "@/hooks/useAnnouncements";
 import { useAuth } from "@/context/AuthContext";
 
@@ -25,8 +25,7 @@ const Announcements = () => {
 
   return (
     <div className="flex h-full w-full flex-col ">
-      <AnnouncementModal />
-
+      {/* <AnnouncementModal /> */}
       <div className="flex w-3/4 items-end justify-between">
         <div className="">
           <h1 className="text-2xl font-bold text-school-800">Announcements</h1>
@@ -40,7 +39,7 @@ const Announcements = () => {
 
       <div className="flex h-fit w-full flex-col-reverse gap-4 lg:h-full lg:flex-row">
         {/* Announcements List */}
-        <div className="no-scrollbar flex w-full flex-col items-center overflow-y-scroll rounded-lg bg-white p-1 pt-3 md:px-9 md:py-6">
+        <div className="no-scrollbar flex w-full flex-col items-center overflow-y-scroll rounded-lg p-1 pt-3 md:px-9 md:py-6">
           <div className="w-full lg:w-2/3">
             {userRole === "admin" && (
               <AnnouncementHeader

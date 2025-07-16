@@ -20,24 +20,32 @@ import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addStudentToClass } from "@/services/class.service";
 import CustomReactSelect from "../CustomReactSelect";
-import { fetchStudentsNoPaginate } from "@/services/students.service";
-import { useParams } from "react-router-dom";
+import { fetchUnassignedStudents } from "@/services/students.service";
+import { useState } from "react";
 
 const addStudentSchema = z.object({
   ids: z.array(z.string().min(1, "At least one student ID is required")),
 });
 
 type addStudentType = z.infer<typeof addStudentSchema>;
-
-const AddStudentToClass = () => {
-  const { id, classId } = useParams<{ id: string; classId: string }>();
+type AddStudentToClassProp = {
+  schoolYearId: string;
+  classId: string;
+};
+const AddStudentToClass = ({
+  schoolYearId,
+  classId,
+}: AddStudentToClassProp) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["students", id],
-    queryFn: () => fetchStudentsNoPaginate(id),
+    queryKey: ["students", schoolYearId],
+    queryFn: () => fetchUnassignedStudents(schoolYearId, classId),
+    enabled: !!schoolYearId,
   });
 
   const form = useForm<addStudentType>({
@@ -50,7 +58,10 @@ const AddStudentToClass = () => {
   const addStudentMutation = useMutation({
     mutationFn: addStudentToClass,
     onSuccess: () => {
-      console.log("Students added successfully!");
+      setDialogOpen(false);
+      queryClient.invalidateQueries({
+        queryKey: ["students-per-class", classId],
+      });
     },
     onError: (error) => {
       console.error("Error adding students:", error);
@@ -68,7 +79,7 @@ const AddStudentToClass = () => {
   };
 
   return (
-    <Dialog>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
         <Button>Add Students</Button>
       </DialogTrigger>

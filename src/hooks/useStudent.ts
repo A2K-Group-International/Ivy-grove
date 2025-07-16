@@ -40,7 +40,57 @@ export function useCreateStudent() {
       queryClient.invalidateQueries({ queryKey: STUDENT_KEYS.all });
     },
     onError: (error) => {
-      console.error("Failed to create stduent:", error);
+      console.error("Failed to create student:", error);
+    },
+  });
+}
+
+export interface UpdateStudentData {
+  id: string;
+  first_name: string;
+  last_name: string;
+  age: number;
+  address: string;
+}
+
+export function useUpdateStudent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (
+      studentData: UpdateStudentData
+    ): Promise<StudentProfile> => {
+      return StudentService.updateStudent(
+        studentData.id,
+        studentData.first_name,
+        studentData.last_name,
+        studentData.age,
+        studentData.address
+      );
+    },
+    onSuccess: () => {
+      // Invalidate all student-related queries to refetch data
+      queryClient.invalidateQueries({ queryKey: STUDENT_KEYS.all });
+    },
+    onError: (error) => {
+      console.error("Failed to update student:", error);
+    },
+  });
+}
+
+export function useDeleteStudent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (studentId: string): Promise<void> => {
+      return StudentService.deleteStudent(studentId);
+    },
+    onSuccess: () => {
+      // Invalidate all student-related queries to refetch data
+      queryClient.invalidateQueries({ queryKey: STUDENT_KEYS.all });
+    },
+    onError: (error) => {
+      console.error("Failed to delete student:", error);
     },
   });
 }

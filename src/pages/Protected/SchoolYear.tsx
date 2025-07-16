@@ -3,22 +3,18 @@ import { useFetchSchoolYears } from "@/hooks/useSchoolYear";
 import { SelectSchoolYear } from "@/components/features/students/SelectSchoolYear";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useGetStudents } from "@/hooks/useStudent";
-import type { StudentProfile } from "@/services/students.service";
-import { StudentCard } from "@/components/features/students/StudentList";
 import { GraduationCap, Loader } from "lucide-react";
-import { CreateStudents } from "@/components/features/students/CreateStudents";
 import { formatSchoolYear } from "@/utils/formatSchoolYear";
 import { format, parseISO } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Classes from "@/pages/Protected/Classes";
 import AddClassForm from "@/components/classes/AddClassForm";
+import StudentsTable from "@/components/features/schoolyear/StudentsTable";
 
 export default function SchoolYear() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [schoolYearId, setSchoolYearId] = useState<string>("");
   const [tab, setTab] = useState("students");
-  const pageSize = 10;
 
   // Fetch School Years
   const {
@@ -26,13 +22,6 @@ export default function SchoolYear() {
     isLoading: isSchoolYearsLoading,
     error: errorLoadingSchoolYears,
   } = useFetchSchoolYears();
-
-  // Fetch students per school year
-  const {
-    data: students,
-    isLoading: isStudentsLoading,
-    error: errorLoadingStudents,
-  } = useGetStudents(1, pageSize, schoolYearId);
 
   // Find the selected school year object
   const selectedSchoolYear = schoolYears?.find((sy) => sy.id === schoolYearId);
@@ -61,10 +50,6 @@ export default function SchoolYear() {
     return <div>Error: {errorLoadingSchoolYears.message}</div>;
   }
 
-  if (errorLoadingStudents) {
-    return <div>Error: {errorLoadingStudents.message}</div>;
-  }
-
   return (
     <div className="space-y-2">
       {/* Header */}
@@ -84,29 +69,10 @@ export default function SchoolYear() {
               <TabsTrigger value="students">Students</TabsTrigger>
               <TabsTrigger value="classes">Classes</TabsTrigger>
             </TabsList>
-            {tab === "students" && (
-              <CreateStudents schoolYearId={schoolYearId} />
-            )}
             {tab === "classes" && <AddClassForm schoolYearId={schoolYearId} />}
           </div>
           <TabsContent value="students">
-            {isStudentsLoading ? (
-              <div className="flex items-center justify-center h-dvh w-full">
-                <Loader className="animate-spin" />
-              </div>
-            ) : (
-              <div className="flex flex-col gap-y-2">
-                <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 max-h-dvh">
-                  {students?.items?.length ? (
-                    students.items.map((student: StudentProfile) => (
-                      <StudentCard key={student.id} student={student} />
-                    ))
-                  ) : (
-                    <div>No students found</div>
-                  )}
-                </div>
-              </div>
-            )}
+            <StudentsTable schoolYearId={schoolYearId} />
           </TabsContent>
           <TabsContent value="classes">
             <Classes schoolYearId={schoolYearId} />

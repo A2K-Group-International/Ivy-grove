@@ -78,7 +78,8 @@ export const fetchAllClasses = async (schoolYearId: string | undefined) => {
   const { data, error } = await supabase
     .from("classes")
     .select("*")
-    .eq("school_year_id", schoolYearId);
+    .eq("school_year_id", schoolYearId)
+    .order("created_at", { ascending: true });
 
   if (error) {
     throw new Error(`Failed to fetch classes: ${error.message}`);

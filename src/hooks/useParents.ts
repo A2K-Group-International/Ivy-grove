@@ -63,3 +63,123 @@ export function useFetchParentsNoPagination() {
     queryFn: UserService.fetchParentsNoPagination,
   });
 }
+
+export function useParentsWithStudents(
+  page: number = 1,
+  pageSize: number = 10
+) {
+  return useQuery({
+    queryKey: ["parents", "with-students", page, pageSize],
+    queryFn: () => UserService.fetchParentsWithStudents(page, pageSize),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
+export function useUpdateParent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      first_name,
+      last_name,
+      contact,
+      email,
+      address,
+    }: {
+      id: string;
+      first_name: string;
+      last_name: string;
+      contact: string;
+      email: string;
+      address?: string | null;
+    }): Promise<UserProfile> => {
+      return UserService.updateParent(
+        id,
+        first_name,
+        last_name,
+        contact,
+        email,
+        address ?? undefined
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PARENTS_KEY.all });
+      queryClient.invalidateQueries({ queryKey: ["parents", "paginated"] });
+      queryClient.invalidateQueries({ queryKey: ["parents", "with-students"] });
+    },
+    onError: (error) => {
+      console.error("Failed to update parent:", error);
+    },
+  });
+}
+
+export function useDeleteParent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string): Promise<void> => {
+      return UserService.deleteParent(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PARENTS_KEY.all });
+      queryClient.invalidateQueries({ queryKey: ["parents", "paginated"] });
+      queryClient.invalidateQueries({ queryKey: ["parents", "with-students"] });
+    },
+    onError: (error) => {
+      console.error("Failed to delete parent:", error);
+    },
+  });
+}
+
+export function useLinkStudentToParent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      studentId,
+      parentId,
+    }: {
+      studentId: string;
+      parentId: string;
+    }): Promise<void> => {
+      return UserService.linkStudentToParent(studentId, parentId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PARENTS_KEY.all });
+      queryClient.invalidateQueries({ queryKey: ["parents", "with-students"] });
+      queryClient.invalidateQueries({ queryKey: ["students"] });
+    },
+    onError: (error) => {
+      console.error("Failed to link student to parent:", error);
+    },
+  });
+}
+
+export function useUnlinkStudentFromParent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (studentId: string): Promise<void> => {
+      return UserService.unlinkStudentFromParent(studentId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PARENTS_KEY.all });
+      queryClient.invalidateQueries({ queryKey: ["parents", "with-students"] });
+      queryClient.invalidateQueries({ queryKey: ["students"] });
+    },
+    onError: (error) => {
+      console.error("Failed to unlink student from parent:", error);
+    },
+  });
+}
+
+export function useUnlinkedStudents() {
+  return useQuery({
+    queryKey: ["students", "unlinked"],
+    queryFn: UserService.getUnlinkedStudents,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}

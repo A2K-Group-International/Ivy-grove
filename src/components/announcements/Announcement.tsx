@@ -45,6 +45,7 @@ import ImageLoader from "@/utils/ImageLoader";
 import { useAuth } from "@/context/AuthContext";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import type { announcementPropType } from "@/types/announcements";
+import { format } from "date-fns";
 
 const Announcement = ({
   announcement,
@@ -63,7 +64,6 @@ const Announcement = ({
     params.set("announcementId", announcementId);
     setParams(params);
   };
-  console.log("Announcement data:", announcement);
 
   return (
     <div>
@@ -81,16 +81,19 @@ const Announcement = ({
             {!isModal && (
               <p
                 onClick={handleParams.bind(null, announcement.id)}
-                className="text-[0.7rem]  hover:cursor-pointer hover:underline md:text-sm transition-colors"
+                className="text-[0.7rem] md:text-sm transition-colors"
               >
-                {new Date(announcement?.created_at).toLocaleString()}
+                {format(
+                  new Date(announcement.created_at),
+                  "MMM dd, yyyy h:mm a"
+                )}
               </p>
             )}
-            {isModal && (
+            {/* {isModal && (
               <p className="text-[0.7rem]  hover:cursor-pointer hover:underline md:text-sm transition-colors">
                 {new Date(announcement?.created_at).toLocaleString()}
               </p>
-            )}
+            )} */}
             {announcement?.visibility === "public" ? (
               <Icon icon="mingcute:world-2-line" className="h-4 w-4 " />
             ) : (
@@ -99,89 +102,91 @@ const Announcement = ({
           </div>
         </div>
 
-        {userProfile?.id === announcement?.created_by && !isModal && (
-          <Popover>
-            <PopoverTrigger>
-              <Icon
-                icon="mingcute:more-1-line"
-                className="h-6 w-6  transition-colors"
-              />
-            </PopoverTrigger>
-            <PopoverContent
-              align="center"
-              className="w-32 overflow-hidden p-0  bg-white shadow-lg"
-            >
-              <div className="p-2 ">
-                <p className="text-center font-semibold">Actions</p>
-              </div>
-              <Separator />
-
-              <AnnouncementForm
-                announcementId={announcement.id}
-                files={announcement.announcement_files}
-                title={announcement.title}
-                content={announcement.content}
+        {(userProfile?.id === announcement?.created_by ||
+          userProfile?.role === "admin") &&
+          !isModal && (
+            <Popover>
+              <PopoverTrigger>
+                <Icon
+                  icon="mingcute:more-1-line"
+                  className="h-6 w-6 transition-colors"
+                />
+              </PopoverTrigger>
+              <PopoverContent
+                align="center"
+                className="w-32 overflow-hidden p-0 bg-white shadow-lg"
               >
-                <Button
-                  variant="ghost"
-                  className="w-full rounded-none p-3 hover:cursor-pointer  "
+                <div className="p-2">
+                  <p className="text-center font-semibold">Actions</p>
+                </div>
+                <Separator />
+
+                <AnnouncementForm
+                  announcementId={announcement.id}
+                  files={announcement.announcement_files}
+                  title={announcement.title}
+                  content={announcement.content}
                 >
-                  Edit
-                </Button>
-              </AnnouncementForm>
-
-              <AlertDialog
-                open={deleteDialogOpen}
-                onOpenChange={(isOpen) => {
-                  setDeleteDialogOpen(isOpen);
-                }}
-              >
-                <AlertDialogTrigger className="w-full" asChild>
                   <Button
                     variant="ghost"
-                    className="w-full rounded-none text-start hover:cursor-pointer hover:bg-red-50 text-red-600"
+                    className="w-full rounded-none p-3 hover:cursor-pointer"
                   >
-                    Delete
+                    Edit
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle className="text-2xl ">
-                      Delete Announcement?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete this Announcement?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel
-                      onClick={() => setDeleteDialogOpen(false)}
+                </AnnouncementForm>
+
+                <AlertDialog
+                  open={deleteDialogOpen}
+                  onOpenChange={(isOpen) => {
+                    setDeleteDialogOpen(isOpen);
+                  }}
+                >
+                  <AlertDialogTrigger className="w-full" asChild>
+                    <Button
+                      variant="ghost"
+                      className="w-full rounded-none text-start hover:cursor-pointer hover:bg-red-50 text-red-600"
                     >
-                      Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => {
-                        deleteAnnouncementMutation?.mutate({
-                          announcementId: announcement.id,
-                          filePaths: announcement.announcement_files.map(
-                            (file) => file.url
-                          ),
-                        });
-                        setDeleteDialogOpen(false);
-                      }}
-                      disabled={deleteAnnouncementMutation?.isPending}
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      {deleteAnnouncementMutation?.isPending
-                        ? "Deleting..."
-                        : "Delete"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </PopoverContent>
-          </Popover>
-        )}
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-2xl">
+                        Delete Announcement?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this announcement?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel
+                        onClick={() => setDeleteDialogOpen(false)}
+                      >
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          deleteAnnouncementMutation?.mutate({
+                            announcementId: announcement.id,
+                            filePaths: announcement.announcement_files.map(
+                              (file) => file.url
+                            ),
+                          });
+                          setDeleteDialogOpen(false);
+                        }}
+                        disabled={deleteAnnouncementMutation?.isPending}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        {deleteAnnouncementMutation?.isPending
+                          ? "Deleting..."
+                          : "Delete"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </PopoverContent>
+            </Popover>
+          )}
       </div>
       <AutoLinkText
         text={announcement?.content}

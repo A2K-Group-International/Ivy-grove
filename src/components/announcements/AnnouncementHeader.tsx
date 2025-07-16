@@ -11,7 +11,7 @@ import AnnouncementForm from "./AnnouncementForm";
 const AnnouncementHeader = ({ image, first_name }: AnnouncementHeaderType) => {
   return (
     <>
-      <div className="flex h-[84px] w-full gap-3 rounded-lg border px-8 py-6 ">
+      <div className="flex h-[84px] w-full gap-3 rounded-lg border px-2 py-6 ">
         <Avatar className="h-8 w-8 border-2 ">
           <AvatarImage src={image ?? ""} alt="profile picture" />
           <AvatarFallback className="bg-school-600 text-white">

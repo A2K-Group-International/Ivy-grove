@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { useParents } from "@/hooks/useParents";
-import type { UserProfile } from "@/services/user.service";
+import { useParentsWithStudents } from "@/hooks/useParents";
+import type { ParentWithStudents } from "@/services/user.service";
 import { capitalizeFirstLetter } from "@/lib/string";
 import { Button } from "@/components/ui/button";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,9 +11,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EllipsisVertical, Home, MailIcon, Phone, Plus } from "lucide-react";
+import { EllipsisVertical, Home, MailIcon, Phone, Plus, Edit, Trash2, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
+import { StudentLinkModal } from "./StudentLinkModal";
+import { EditParent } from "./EditParent";
+import { DeleteParent } from "./DeleteParent";
 
 interface ParentListProps {
   isActive: boolean;
@@ -28,7 +30,7 @@ export function ParentList({ isActive }: ParentListProps) {
     data: parents,
     isLoading,
     error,
-  } = useParents(isActive ? currentPage : 1, pageSize);
+  } = useParentsWithStudents(isActive ? currentPage : 1, pageSize);
 
   if (!isActive) return null;
 
@@ -60,10 +62,10 @@ export function ParentList({ isActive }: ParentListProps) {
 
   return (
     <div className="space-y-4">
-      {/* Teachers Grid */}
+      {/* Parents Grid */}
       <div className="grid gap-4 max-h-dvh">
-        {parents.items.map((parent: UserProfile) => (
-          <TeacherCard key={parent.id} parent={parent} />
+        {parents.items.map((parent: ParentWithStudents) => (
+          <ParentCard key={parent.id} parent={parent} />
         ))}
       </div>
 
@@ -81,10 +83,13 @@ export function ParentList({ isActive }: ParentListProps) {
 }
 
 interface ParentCardProps {
-  parent: UserProfile;
+  parent: ParentWithStudents;
 }
 
-function TeacherCard({ parent }: ParentCardProps) {
+function ParentCard({ parent }: ParentCardProps) {
+  const [studentLinkModalOpen, setStudentLinkModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   return (
     <div className="p-4 border rounded-lg hover:shadow-md transition-shadow bg-white flex flex-col gap-y-2">
       <div className="flex gap-x-2 justify-between">
@@ -106,7 +111,10 @@ function TeacherCard({ parent }: ParentCardProps) {
             </div>
           </div>
         </div>
-        <ActionButtons />
+        <ActionButtons 
+          onEdit={() => setEditModalOpen(true)}
+          onDelete={() => setDeleteModalOpen(true)}
+        />
       </div>
       <div className="space-y-1 flex gap-x-10 flex-col gap-y-5 md:flex-row">
         <div className="space-y-2 flex-1">
@@ -120,32 +128,69 @@ function TeacherCard({ parent }: ParentCardProps) {
           </Label>
           <Label className="text-sm text-gray-500">
             <Home size={18} />
-            {parent.address}
+            {parent.address || "No address provided"}
           </Label>
         </div>
         {/* Student List */}
         <div className="flex-1">
           <div className="flex items-center gap-x-2">
-            <Label className="text-lg text-gray-600">Student(s)</Label>
-            <Plus className="text-green-500" size={18} />
+            <Label className="text-lg text-gray-600">Student(s) ({parent.students.length})</Label>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setStudentLinkModalOpen(true)}
+              className="text-green-600 hover:text-green-700 p-1"
+              title="Manage student links"
+            >
+              <Plus size={18} />
+            </Button>
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl">
-              <Avatar className="w-8 h-8">
-                <AvatarImage src={"/placeholder.svg"} />
-                <AvatarFallback className="bg-green-100 text-school-600 text-xs">
-                  CN
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <p className="font-medium text-sm">Aldrich Bondoc</p>
-                <p className="text-xs text-gray-600">Age 13</p>
+            {parent.students.length === 0 ? (
+              <div className="flex items-center justify-center p-4 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                <p className="text-sm text-gray-500">No students linked</p>
               </div>
-            </div>
+            ) : (
+              parent.students.map((student) => (
+                <div key={student.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={"/placeholder.svg"} />
+                    <AvatarFallback className="bg-green-100 text-school-600 text-xs">
+                      {student.first_name[0]}{student.last_name[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{student.first_name} {student.last_name}</p>
+                    <p className="text-xs text-gray-600">Age {student.age}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <StudentLinkModal
+        parentId={parent.id}
+        parentName={`${parent.first_name} ${parent.last_name}`}
+        linkedStudents={parent.students}
+        isOpen={studentLinkModalOpen}
+        onClose={() => setStudentLinkModalOpen(false)}
+      />
+
+      <EditParent
+        parent={parent}
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+      />
+
+      <DeleteParent
+        parent={parent}
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+      />
     </div>
   );
 }
@@ -157,7 +202,12 @@ interface PaginationProps {
   totalItems: number;
 }
 
-function ActionButtons() {
+interface ActionButtonsProps {
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+function ActionButtons({ onEdit, onDelete }: ActionButtonsProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -168,8 +218,17 @@ function ActionButtons() {
       <DropdownMenuContent>
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Edit</DropdownMenuItem>
-        <DropdownMenuItem>Delete</DropdownMenuItem>
+        <DropdownMenuItem onClick={onEdit} className="cursor-pointer">
+          <Edit className="w-4 h-4 mr-2" />
+          Edit
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={onDelete} 
+          className="cursor-pointer text-red-600 focus:text-red-600"
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          Delete
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

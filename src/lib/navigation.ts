@@ -31,15 +31,15 @@ export const menuItems: MenuItem[] = [
     roles: ["admin", "teacher", "parent"],
   },
   {
-    title: "Users",
-    url: "/users",
-    icon: Users,
-    roles: ["admin"],
-  },
-  {
     title: "School Year",
     url: "/school-year",
     icon: School,
+    roles: ["admin"],
+  },
+  {
+    title: "Users",
+    url: "/users",
+    icon: Users,
     roles: ["admin"],
   },
   {
