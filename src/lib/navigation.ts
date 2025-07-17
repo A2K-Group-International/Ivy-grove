@@ -6,6 +6,7 @@ import {
   School,
   Megaphone,
   List,
+  Group,
 } from "lucide-react";
 import type { UserRole } from "@/context/AuthContext";
 
@@ -31,6 +32,18 @@ export const menuItems: MenuItem[] = [
     roles: ["admin", "teacher", "parent"],
   },
   {
+    title: "Groups",
+    url: "/groups",
+    icon: Group,
+    roles: ["admin", "teacher", "parent"],
+  },
+  {
+    title: "Attendance",
+    url: "/attendance",
+    icon: List,
+    roles: ["admin", "teacher"],
+  },
+  {
     title: "School Year",
     url: "/school-year",
     icon: School,
@@ -41,12 +54,6 @@ export const menuItems: MenuItem[] = [
     url: "/users",
     icon: Users,
     roles: ["admin"],
-  },
-  {
-    title: "Attendance",
-    url: "/attendance",
-    icon: List,
-    roles: ["admin", "teacher"],
   },
 
   // Parent only

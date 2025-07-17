@@ -113,7 +113,7 @@ const StudentsTable = ({ schoolYearId }: StudentsTableProps) => {
                 <TableCell className="py-4">
                   <div className="flex items-center gap-4">
                     <Avatar className="h-12 w-12 border-2 border-school-100">
-                      <AvatarImage src="https://avatar.iran.liara.run/public" />
+                      <AvatarImage src="https://images.unsplash.com/photo-1750535135593-3a8e5def331d?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" />
                       <AvatarFallback className="bg-school-50 text-school-700 font-semibold">
                         {`${getInitial(student.first_name)}${getInitial(
                           student.last_name

@@ -17,6 +17,7 @@ import Users from "@/pages/Protected/Users";
 import SchoolYear from "@/pages/Protected/SchoolYear";
 import Announcements from "./pages/Protected/Announcements";
 import Attendance from "./pages/Protected/Attendance";
+import Groups from "./pages/Protected/Groups";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -112,6 +113,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
               <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="groups"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
+              <Groups />
             </ProtectedRoute>
           }
         />
