@@ -15,7 +15,8 @@ export const createGroup = async (groupData: CreateGroupData) => {
     throw new Error("User not authenticated");
   }
 
-  const { data, error } = await supabase
+  // Start a transaction to create group and add creator as member
+  const { data: group, error: groupError } = await supabase
     .from("groups")
     .insert({
       name: groupData.name,
@@ -24,24 +25,61 @@ export const createGroup = async (groupData: CreateGroupData) => {
     .select()
     .single();
 
-  if (error) {
-    throw new Error(`Failed to create group: ${error.message}`);
+  if (groupError) {
+    throw new Error(`Failed to create group: ${groupError.message}`);
   }
 
-  return data;
+  // Add the creator as a member of the group
+  const { error: memberError } = await supabase
+    .from("group_members")
+    .insert({
+      group_id: group.id,
+      user_id: user.id,
+      added_by: user.id, // Creator adds themselves
+    });
+
+  if (memberError) {
+    // If adding member fails, we should ideally rollback the group creation
+    // For now, just log the error but don't fail the entire operation
+    console.error("Failed to add creator as group member:", memberError);
+  }
+
+  return group;
 };
 
 export const fetchGroups = async () => {
+  // Get current user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("User not authenticated");
+  }
+
+  // Fetch only groups where the user is a member
   const { data, error } = await supabase
     .from("groups")
-    .select("id, name")
+    .select(`
+      id, 
+      name,
+      group_members!inner(user_id)
+    `)
+    .eq("group_members.user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(`Failed to fetch groups: ${error.message}`);
   }
 
-  return data;
+  // Clean up the data structure to remove the join data
+  const cleanedData = data?.map(group => ({
+    id: group.id,
+    name: group.name
+  }));
+
+  return cleanedData;
 };
 
 export interface EditGroupData {

@@ -1,17 +1,14 @@
-"use client";
-
-import type React from "react";
-
 import type { Group } from "@/pages/Protected/Groups";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Paperclip, Smile, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Send, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { MessageBubble } from "./Message-Bubble";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+
 import AddGroupMembers from "./AddGroupMembers";
 import { useGroupChat } from "@/hooks/groups/useGroupChat";
+import { useChatScroll } from "@/hooks/groups/useChatScroll";
 
 interface ChatInterfaceProps {
   group: Group;
@@ -20,24 +17,52 @@ interface ChatInterfaceProps {
 
 export function ChatInterface({ group, currentUserName }: ChatInterfaceProps) {
   const [newMessage, setNewMessage] = useState("");
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
 
-  // Use the useGroupChat hook instead of useSendMessage
-  const { messages, sendMessage, isConnected, isLoading } = useGroupChat({
+  const {
+    messages,
+    sendMessage,
+    isConnected,
+    isLoading,
+    loadMoreMessages,
+    isLoadingMore,
+    hasMore,
+  } = useGroupChat({
     groupId: group.id,
-    currentUserName,
+  });
+
+  const { containerRef, scrollToBottom } = useChatScroll({
+    onLoadMore: loadMoreMessages,
+    isLoadingMore,
+    hasMore,
   });
 
   const [isSending, setIsSending] = useState(false);
 
+  useEffect(() => {
+    // Only scroll to bottom for new messages or initial load, not when loading older ones
+    if (!isLoadingMore && shouldScrollToBottom) {
+      scrollToBottom();
+    }
+  }, [messages, scrollToBottom, isLoadingMore, shouldScrollToBottom]);
+
+  // Disable auto-scroll when user scrolls up to load more
+  useEffect(() => {
+    if (isLoadingMore) {
+      setShouldScrollToBottom(false);
+    }
+  }, [isLoadingMore]);
+
+  // Re-enable auto-scroll when sending a new message
   const handleSendMessage = async () => {
-    if (newMessage.trim() && isConnected) {
+    if (newMessage.trim()) {
       setIsSending(true);
+      setShouldScrollToBottom(true); // Enable scroll for new message
       try {
         await sendMessage(newMessage);
         setNewMessage("");
       } catch (error) {
         console.error("Failed to send message:", error);
-        // You might want to show a toast notification here
       } finally {
         setIsSending(false);
       }
@@ -82,7 +107,7 @@ export function ChatInterface({ group, currentUserName }: ChatInterfaceProps) {
       </div>
 
       {/* Messages Area */}
-      <ScrollArea className="flex-1 p-4">
+      <div className="flex-1 p-4 overflow-y-auto" ref={containerRef}>
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
@@ -90,6 +115,14 @@ export function ChatInterface({ group, currentUserName }: ChatInterfaceProps) {
           </div>
         ) : (
           <div className="space-y-4">
+            {isLoadingMore && (
+              <div className="flex items-center justify-center py-2">
+                <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                <span className="ml-2 text-sm text-gray-500">
+                  Loading more messages...
+                </span>
+              </div>
+            )}
             {messages.map((message) => (
               <MessageBubble
                 key={message.id}
@@ -104,36 +137,25 @@ export function ChatInterface({ group, currentUserName }: ChatInterfaceProps) {
             )}
           </div>
         )}
-      </ScrollArea>
+      </div>
 
       {/* Message Input */}
       <div className="border-t border-gray-200 py-2">
         <div className="flex items-end space-x-2">
-          <Button variant="ghost" size="sm" className="p-2">
-            <Paperclip className="h-5 w-5 text-gray-500" />
-          </Button>
-
-          <div className="flex-1 relative">
+          <div className="flex-1 px-2 relative">
             <Input
               placeholder={`Message ${group.name}`}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               className="pr-10 resize-none"
-              disabled={!isConnected || isSending}
+              disabled={isSending}
             />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-1 top-1/2 transform -translate-y-1/2 p-1"
-            >
-              <Smile className="h-4 w-4 text-gray-500" />
-            </Button>
           </div>
 
           <Button
             onClick={handleSendMessage}
-            disabled={!newMessage.trim() || !isConnected || isSending}
+            disabled={!newMessage.trim() || isSending}
             size="sm"
             className="px-3"
           >

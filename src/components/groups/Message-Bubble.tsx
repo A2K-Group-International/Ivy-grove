@@ -1,5 +1,5 @@
 import type { Message } from "@/pages/Protected/Groups";
-import { cn } from "@/lib/utils";
+import { cn, getInitial } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface MessageBubbleProps {
@@ -7,19 +7,15 @@ interface MessageBubbleProps {
   currentUserName?: string;
 }
 
-// Helper function to get initials from name
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((word) => word.charAt(0))
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
 // Helper function to format timestamp
 function formatTimestamp(timestamp: string): string {
   const date = new Date(timestamp);
+  
+  // Check if the date is valid
+  if (isNaN(date.getTime())) {
+    return "Invalid date";
+  }
+  
   const now = new Date();
   const isToday = date.toDateString() === now.toDateString();
 
@@ -40,10 +36,12 @@ export function MessageBubble({
   currentUserName,
 }: MessageBubbleProps) {
   // Determine if this message is from the current user
-  const isOwn = currentUserName ? message.user.name === currentUserName : false;
+  const isOwn = currentUserName
+    ? message?.user?.name === currentUserName
+    : false;
 
   // Get user initials
-  const userInitials = getInitials(message.user.name);
+  const userInitials = getInitial(message?.user?.name);
 
   return (
     <div
@@ -68,7 +66,7 @@ export function MessageBubble({
       >
         {!isOwn && (
           <span className="text-xs font-medium text-gray-700 mb-1">
-            {message.user.name}
+            {message?.user?.name}
           </span>
         )}
 
@@ -80,7 +78,7 @@ export function MessageBubble({
               : "bg-gray-100 text-gray-900 rounded-bl-md"
           )}
         >
-          <p className="text-sm leading-relaxed">{message.content}</p>
+          <p className="text-sm leading-relaxed">{message?.content}</p>
         </div>
 
         <span className="text-xs text-gray-500 mt-1">

@@ -17,7 +17,6 @@ export interface Group {
   avatar?: string;
 }
 
-// Updated Message interface to match GroupChatMessage
 export interface Message {
   id: string;
   content: string;
@@ -54,7 +53,6 @@ function Groups() {
     groups?.map((group) => ({
       id: group.id,
       name: group.name,
-      lastMessage: "No messages yet",
       avatar: "/Ivy-logo.png",
     })) || [];
 
@@ -67,7 +65,7 @@ function Groups() {
   }
 
   return (
-    <div className="flex h-dvh bg-gray-50">
+    <div className="flex h-full">
       {/* Desktop Layout */}
       <div className="hidden md:flex w-full">
         {/* Sidebar */}
@@ -127,7 +125,7 @@ function Groups() {
             isLoading={isLoading}
           />
         ) : selectedGroup ? (
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-[calc(100%-2.5rem)]">
             <div className="border-b border-gray-200 py-3 flex items-center justify-between">
               <div className="flex items-center gap-x-2">
                 <Button

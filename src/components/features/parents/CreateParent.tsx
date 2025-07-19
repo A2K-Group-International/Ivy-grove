@@ -58,7 +58,7 @@ export function CreateParent() {
       last_name: "",
       contact: "",
       email: "",
-      password: "",
+      password: "123456",
       address: "",
     },
   });

@@ -58,7 +58,7 @@ export function CreateTeacher() {
       last_name: "",
       contact: "",
       email: "",
-      password: "",
+      password: "123456",
       address: "",
     },
   });
