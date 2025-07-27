@@ -27,6 +27,8 @@ import { useGroupMembers } from "@/hooks/groups/useGroupMembers";
 import type { Group } from "@/pages/Protected/Groups";
 import CustomReactSelect from "../CustomReactSelect";
 
+import RemoveGroupMembers from "./RemoveGroupMembers";
+
 const formSchema = z.object({
   userIds: z.array(z.string()).min(1, "Please select at least one member"),
 });
@@ -154,6 +156,12 @@ const AddGroupMembers = ({ group }: AddGroupMembersProps) => {
                           Added{" "}
                           {new Date(member.created_at).toLocaleDateString()}
                         </p>
+                      </div>
+                      <div>
+                        <RemoveGroupMembers
+                          groupId={group.id}
+                          userId={member.user_id}
+                        />
                       </div>
                     </div>
                   ))
