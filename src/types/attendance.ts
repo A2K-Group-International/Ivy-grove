@@ -11,6 +11,12 @@ type Student = {
     id: string;
     first_name: string;
     last_name: string;
+    parent_id: {
+      id: string;
+      first_name: string;
+      last_name: string;
+      address: string;
+    } | null;
   };
 };
 

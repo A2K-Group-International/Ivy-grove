@@ -37,8 +37,6 @@ const StudentCard = ({
     }
   };
 
-  console.log(student);
-
   return (
     <div className="flex flex-col md:flex-row md:justify-between gap-y-2 p-4 rounded-lg border bg-white hover:shadow-sm transition-all duration-200">
       <div className="flex items-center gap-3">

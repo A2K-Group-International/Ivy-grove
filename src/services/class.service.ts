@@ -147,7 +147,7 @@ export const fetchStudentsByClassWithStatus = async (
   const { data, error } = await supabase
     .from("class_students")
     .select(
-      "*, attendance(id, time_in, time_out), students(id, first_name, last_name)"
+      "*, attendance(id, time_in, time_out), students(id, first_name, last_name, parent_id(*))"
     )
     .eq("class_id", classId)
     .eq("attendance.date", date);

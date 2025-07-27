@@ -68,10 +68,7 @@ export class StudentService {
    * Delete student
    */
   static async deleteStudent(id: string): Promise<void> {
-    const { error } = await supabase
-      .from("students")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("students").delete().eq("id", id);
 
     if (error) throw error;
   }

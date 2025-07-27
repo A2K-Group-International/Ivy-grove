@@ -122,7 +122,11 @@ const Attendance = () => {
 
         <div className="flex gap-2">
           {/* QR SCANNER /> */}
-          <QRScanner />
+          <QRScanner
+            students={students}
+            onCheckIn={handleCheckIn}
+            onCheckOut={handleCheckOut}
+          />
         </div>
       </div>
 
