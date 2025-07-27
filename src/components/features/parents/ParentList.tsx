@@ -11,7 +11,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EllipsisVertical, Home, MailIcon, Phone, Plus, Edit, Trash2, Users } from "lucide-react";
+import {
+  EllipsisVertical,
+  Home,
+  MailIcon,
+  Phone,
+  Plus,
+  Edit,
+  Trash2,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { StudentLinkModal } from "./StudentLinkModal";
@@ -111,7 +119,7 @@ function ParentCard({ parent }: ParentCardProps) {
             </div>
           </div>
         </div>
-        <ActionButtons 
+        <ActionButtons
           onEdit={() => setEditModalOpen(true)}
           onDelete={() => setDeleteModalOpen(true)}
         />
@@ -134,7 +142,9 @@ function ParentCard({ parent }: ParentCardProps) {
         {/* Student List */}
         <div className="flex-1">
           <div className="flex items-center gap-x-2">
-            <Label className="text-lg text-gray-600">Student(s) ({parent.students.length})</Label>
+            <Label className="text-lg text-gray-600">
+              Student(s) ({parent.students.length})
+            </Label>
             <Button
               variant="ghost"
               size="sm"
@@ -153,15 +163,21 @@ function ParentCard({ parent }: ParentCardProps) {
               </div>
             ) : (
               parent.students.map((student) => (
-                <div key={student.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl">
+                <div
+                  key={student.id}
+                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl"
+                >
                   <Avatar className="w-8 h-8">
                     <AvatarImage src={"/placeholder.svg"} />
                     <AvatarFallback className="bg-green-100 text-school-600 text-xs">
-                      {student.first_name[0]}{student.last_name[0]}
+                      {student.first_name[0]}
+                      {student.last_name[0]}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <p className="font-medium text-sm">{student.first_name} {student.last_name}</p>
+                    <p className="font-medium text-sm">
+                      {student.first_name} {student.last_name}
+                    </p>
                     <p className="text-xs text-gray-600">Age {student.age}</p>
                   </div>
                 </div>
@@ -222,8 +238,8 @@ function ActionButtons({ onEdit, onDelete }: ActionButtonsProps) {
           <Edit className="w-4 h-4 mr-2" />
           Edit
         </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={onDelete} 
+        <DropdownMenuItem
+          onClick={onDelete}
           className="cursor-pointer text-red-600 focus:text-red-600"
         >
           <Trash2 className="w-4 h-4 mr-2" />

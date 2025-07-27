@@ -1,4 +1,3 @@
-import { de } from "date-fns/locale";
 import { Skeleton } from "../ui/skeleton";
 
 const StudentCardSkeleton = () => (

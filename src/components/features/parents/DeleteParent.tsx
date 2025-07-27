@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,7 +8,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { Loader, Trash2 } from "lucide-react";
 import { useDeleteParent } from "@/hooks/useParents";
 import type { UserProfile } from "@/services/user.service";
@@ -41,7 +39,11 @@ export function DeleteParent({ parent, isOpen, onClose }: DeleteParentProps) {
           </AlertDialogTitle>
           <AlertDialogDescription className="text-left">
             <div>
-              Are you sure you want to delete <strong>{parent.first_name} {parent.last_name}</strong>?
+              Are you sure you want to delete{" "}
+              <strong>
+                {parent.first_name} {parent.last_name}
+              </strong>
+              ?
             </div>
             <div className="mt-4">
               <span className="text-amber-600 font-medium">

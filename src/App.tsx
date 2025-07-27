@@ -10,7 +10,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import Landing from "@/pages/Landing";
 import Overview from "@/pages/Protected/Overview";
-import Settings from "@/pages/Protected/Settings";
+// import Settings from "@/pages/Protected/Settings";
 import { Loader } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import Users from "@/pages/Protected/Users";
@@ -113,7 +113,8 @@ function AppRoutes() {
           path="settings"
           element={
             <ProtectedRoute allowedRoles={["admin", "teacher", "parent"]}>
-              <Settings />
+              {/* <Settings /> */}
+              <div>Coming Soon!</div>
             </ProtectedRoute>
           }
         />
