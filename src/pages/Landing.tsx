@@ -5,7 +5,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-dvh flex flex-col relative">
-      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-[url('../src/assets/images/ivy-grove-architect-perspective.jpeg')]">
+      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-[url('/ivy-grove-architect-perspective.jpeg')]">
         <div className="absolute inset-0 bg-black/10 backdrop-blur-[1px]"></div>
       </div>
       <Login />
