@@ -183,3 +183,13 @@ export function useUnlinkedStudents() {
     gcTime: 10 * 60 * 1000,
   });
 }
+
+export function useStudentsByParentId(parentId: string) {
+  return useQuery({
+    queryKey: ["students", "by-parent", parentId],
+    queryFn: () => UserService.getStudentsByParentId(parentId),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    enabled: !!parentId,
+  });
+}
