@@ -31,20 +31,18 @@ const AnnouncementSchema = z.object({
       z.array(z.instanceof(File)).max(10, "Maximum of 10 files allowed"), // Accepts multiple files
     ])
     .optional() // Make it optional if files are not required
-    .refine(
-      (files) =>
-        Array.isArray(files)
-          ? files.every((file) => file.size <= MAX_FILE_SIZE)
-          : files.size <= MAX_FILE_SIZE,
-      `Each file must not exceed 50MB`
-    )
-    .refine(
-      (files) =>
-        Array.isArray(files)
-          ? files.every((file) => allowedMimeTypes.includes(file.type))
-          : allowedMimeTypes.includes(files.type),
-      "Invalid file type. Allowed: jpg, jpeg, png, gif, mp4, avi, mov, pdf, ppt, pptx, doc, docx. ,webp"
-    ),
+    .refine((files) => {
+      if (!files) return true;
+      return Array.isArray(files)
+        ? files.every((file) => file.size <= MAX_FILE_SIZE)
+        : files.size <= MAX_FILE_SIZE;
+    }, `Each file must not exceed 50MB`)
+    .refine((files) => {
+      if (!files) return true;
+      return Array.isArray(files)
+        ? files.every((file) => allowedMimeTypes.includes(file.type))
+        : allowedMimeTypes.includes(files.type);
+    }, "Invalid file type. Allowed: jpg, jpeg, png, gif, mp4, avi, mov, pdf, ppt, pptx, doc, docx. ,webp"),
 });
 
 type AnnouncementSchemaType = z.infer<typeof AnnouncementSchema>;

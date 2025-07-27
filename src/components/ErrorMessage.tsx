@@ -1,5 +1,3 @@
-import React from "react";
-
 const ErrorMessage = ({ message }: { message: string }) => {
   return (
     <div className="flex justify-center items-center py-8">
