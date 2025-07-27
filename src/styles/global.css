@@ -132,12 +132,148 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  html, body, #root {
+    @apply h-dvh;
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer components {
+  /* Enhanced Button Variants */
+  .btn-primary {
+    @apply bg-school-600 hover:bg-school-700 text-white shadow-sm transition-all duration-200 font-medium;
+  }
+  .btn-secondary {
+    @apply bg-school-100 hover:bg-school-200 text-school-700 border border-school-300 transition-all duration-200 font-medium;
+  }
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white shadow-sm transition-all duration-200 font-medium;
+  }
+
+  /* Enhanced Card Styles */
+  .card-enhanced {
+    @apply bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm;
+  }
+  .card-header-enhanced {
+    @apply border-b border-gray-100 p-6;
+  }
+  .card-content-enhanced {
+    @apply p-6;
+  }
+
+  /* Form Enhancements */
+  .form-group {
+    @apply space-y-2;
+  }
+  .form-label-enhanced {
+    @apply text-sm font-semibold text-gray-700;
+  }
+  .form-input-enhanced {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-school-500 focus:border-school-500 transition-all duration-200 placeholder:text-gray-400;
+  }
+
+  /* Loading States */
+  .loading-skeleton {
+    @apply animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] rounded;
+  }
+
+  /* Responsive Table */
+  .table-responsive {
+    @apply w-full overflow-x-auto rounded-lg border border-gray-200;
+  }
+  
+  /* Enhanced Dropdown */
+  .dropdown-enhanced {
+    @apply bg-white border border-gray-200 rounded-lg shadow-lg animate-in fade-in-0 zoom-in-95 duration-100;
+  }
+
+  /* Status Badges */
+  .badge-success {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800;
+  }
+  .badge-warning {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800;
+  }
+  .badge-error {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800;
+  }
+  .badge-info {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800;
+  }
+
+  /* Page Headers */
+  .page-header {
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8;
+  }
+  .page-title {
+    @apply text-2xl sm:text-3xl font-bold text-gray-900;
+  }
+  .page-subtitle {
+    @apply text-sm text-gray-600 mt-1;
+  }
+
+  /* Enhanced Sidebars */
+  .sidebar-enhanced {
+    @apply bg-white border-r border-gray-200 shadow-sm backdrop-blur-sm;
+  }
+  
+  /* Mobile-first responsive utilities */
+  .container-responsive {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Focus states */
+  .focus-enhanced {
+    @apply focus:outline-none focus:ring-2 focus:ring-school-500 focus:ring-offset-2;
+  }
+
+  /* Enhanced shadows */
+  .shadow-enhanced {
+    @apply shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  .shadow-card {
+    @apply shadow-[0_1px_3px_0_rgb(0_0_0_/_0.1),_0_1px_2px_-1px_rgb(0_0_0_/_0.1)] hover:shadow-[0_4px_6px_-1px_rgb(0_0_0_/_0.1),_0_2px_4px_-2px_rgb(0_0_0_/_0.1)] transition-shadow duration-200;
+  }
+}
+
+@layer utilities {
+  /* Scrollbar styles */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full hover:bg-gray-400;
+  }
+
+  /* Truncate text utilities */
+  .truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }

@@ -1,15 +1,12 @@
 import {
   Home,
   Users,
-  GraduationCap,
-  BookOpen,
-  Calendar,
-  FileText,
-  MessageSquare,
-  UserCheck,
-  ClipboardList,
   Baby,
   type LucideIcon,
+  School,
+  Megaphone,
+  List,
+  Group,
 } from "lucide-react";
 import type { UserRole } from "@/context/AuthContext";
 
@@ -29,79 +26,41 @@ export const menuItems: MenuItem[] = [
     roles: ["admin"],
   },
   {
-    title: "Students",
-    url: "/dashboard/students",
-    icon: Users,
-    roles: ["admin"],
-  },
-  {
-    title: "Teachers",
-    url: "/dashboard/teachers",
-    icon: GraduationCap,
-    roles: ["admin"],
-  },
-  {
-    title: "Classes",
-    url: "/dashboard/classes",
-    icon: BookOpen,
-    roles: ["admin"],
-  },
-
-  // Teacher only
-  {
     title: "Announcement",
-    url: "/teacher-dashboard",
-    icon: Home,
-    roles: ["teacher"],
+    url: "/announcement",
+    icon: Megaphone,
+    roles: ["admin", "teacher", "parent"],
+  },
+  {
+    title: "Groups",
+    url: "/groups",
+    icon: Group,
+    roles: ["admin", "teacher", "parent"],
   },
   {
     title: "Attendance",
-    url: "/teacher-dashboard/attendance",
-    icon: UserCheck,
-    roles: ["teacher"],
+    url: "/attendance",
+    icon: List,
+    roles: ["admin", "teacher"],
+  },
+  {
+    title: "School Year",
+    url: "/school-year",
+    icon: School,
+    roles: ["admin"],
+  },
+  {
+    title: "Users",
+    url: "/users",
+    icon: Users,
+    roles: ["admin"],
   },
 
   // Parent only
   {
-    title: "My Dashboard",
-    url: "/parent-dashboard",
-    icon: Home,
-    roles: ["parent"],
-  },
-  {
     title: "My Children",
-    url: "/parent-dashboard/children",
+    url: "/children",
     icon: Baby,
-    roles: ["parent"],
-  },
-  {
-    title: "Attendance",
-    url: "/parent-dashboard/attendance",
-    icon: UserCheck,
-    roles: ["parent"],
-  },
-  {
-    title: "Assignments",
-    url: "/parent-dashboard/assignments",
-    icon: ClipboardList,
-    roles: ["parent"],
-  },
-  {
-    title: "Schedule",
-    url: "/parent-dashboard/schedule",
-    icon: Calendar,
-    roles: ["parent"],
-  },
-  {
-    title: "Reports",
-    url: "/parent-dashboard/reports",
-    icon: FileText,
-    roles: ["parent"],
-  },
-  {
-    title: "Messages",
-    url: "/parent-dashboard/messages",
-    icon: MessageSquare,
     roles: ["parent"],
   },
 ];

@@ -3,7 +3,7 @@ import { AuthService } from "@/services/auth.service";
 
 export const AUTH_KEYS = {
   session: ["auth", "session"] as const,
-  profile: (email: string) => ["auth", "profile", email] as const,
+  profile: (id: string) => ["auth", "profile", id] as const,
 };
 
 /**

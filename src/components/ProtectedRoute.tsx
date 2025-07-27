@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth, type UserRole } from "@/context/AuthContext";
+import Loading from "@/components/Loading";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,14 +11,10 @@ export const ProtectedRoute = ({
   children,
   allowedRoles,
 }: ProtectedRouteProps) => {
-  const { user, userRole, initializing } = useAuth();
+  const { user, userRole, initializing, loading } = useAuth();
 
-  if (initializing) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+  if (initializing || loading) {
+    return <Loading />;
   }
 
   if (!user) {
@@ -31,9 +28,9 @@ export const ProtectedRoute = ({
       case "admin":
         return <Navigate to="/dashboard" replace />;
       case "teacher":
-        return <Navigate to="/teacher-dashboard" replace />;
+        return <Navigate to="/announcement" replace />;
       case "parent":
-        return <Navigate to="/parent-dashboard" replace />;
+        return <Navigate to="/announcement" replace />;
       default:
         return <Navigate to="/" replace />;
     }

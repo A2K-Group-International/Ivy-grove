@@ -6,9 +6,11 @@ export type UserRole = "admin" | "teacher" | "parent";
 export interface UserProfile {
   id: string;
   email: string;
+  first_name: string;
+  last_name: string;
   role: UserRole;
-  created_at: string;
-  updated_at: string;
+  contact: string;
+  address: string;
 }
 
 export class AuthService {
@@ -72,7 +74,7 @@ export class AuthService {
   }
 
   /**
-   * Fetch user profile and role
+   * Fetch all user profile
    */
   static async fetchUserProfile(id: string): Promise<UserProfile | null> {
     try {
@@ -96,21 +98,120 @@ export class AuthService {
   /**
    * Create new user profile
    */
-  static async createUserProfile(
+  static async createAccount(
+    id: string,
     email: string,
-    role: UserRole = "parent"
+    first_name: string,
+    last_name: string,
+    contact: string,
+    address: string,
+    role: UserRole
   ): Promise<UserProfile> {
     const { data, error } = await supabase
       .from("users")
       .insert({
+        id,
         email,
+        first_name,
+        last_name,
+        contact,
+        address,
         role,
       })
-      .select("*")
+      .select()
       .single();
 
     if (error) throw error;
     return data;
+  }
+
+  // Create teacher
+  static async createTeacher(
+    email: string,
+    password: string,
+    contact: string,
+    first_name: string,
+    last_name: string,
+    address: string
+  ): Promise<UserProfile> {
+    try {
+      // Sign up user
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error("Supabase signUp error:", {
+          message: error.message,
+          details: error,
+        });
+        throw error;
+      }
+
+      if (!data?.user?.id) {
+        throw new Error("User id  is not found");
+      }
+
+      const profile = await this.createAccount(
+        data.user.id,
+        email,
+        first_name,
+        last_name,
+        contact,
+        address,
+        "teacher" // role
+      );
+
+      return profile;
+    } catch (error) {
+      console.error("Error creating teacher:", error);
+      throw error;
+    }
+  }
+
+  static async createParent(
+    email: string,
+    password: string,
+    contact: string,
+    first_name: string,
+    last_name: string,
+    address: string
+  ): Promise<UserProfile> {
+    try {
+      // Sign up user
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error("Supabase signUp error:", {
+          message: error.message,
+          details: error,
+        });
+        throw error;
+      }
+
+      if (!data?.user?.id) {
+        throw new Error("User id  is not found");
+      }
+
+      const profile = await this.createAccount(
+        data.user.id,
+        email,
+        first_name,
+        last_name,
+        contact,
+        address,
+        "parent" // role
+      );
+
+      return profile;
+    } catch (error) {
+      console.error("Error creating parent:", error);
+      throw error;
+    }
   }
 
   /**
