@@ -380,14 +380,44 @@ export const deleteAnnouncement = async ({
 }: DeleteAnnouncementType) => {
   const urls = filePaths?.map((publicUrl) => {
     try {
+      // Validate that publicUrl is not empty or null
+      if (!publicUrl || typeof publicUrl !== "string") {
+        throw new Error("Invalid or empty URL provided");
+      }
+
       const decodedUrl = decodeURIComponent(publicUrl);
+
+      // Check if the decoded URL looks like a valid URL before constructing URL object
+      if (
+        !decodedUrl.startsWith("http://") &&
+        !decodedUrl.startsWith("https://")
+      ) {
+        throw new Error("URL must start with http:// or https://");
+      }
+
       const urlParts = new URL(decodedUrl);
-      const path = urlParts.pathname.split(
-        "/storage/v1/object/public/uploads/"
-      )[1];
+
+      // Handle different URL patterns for Supabase storage
+      let path = null;
+
+      // Try to extract path from public URL pattern
+      if (urlParts.pathname.includes("/storage/v1/object/public/uploads/")) {
+        path = urlParts.pathname.split("/storage/v1/object/public/uploads/")[1];
+      }
+      // Try to extract path from signed URL pattern
+      else if (urlParts.pathname.includes("/storage/v1/object/sign/uploads/")) {
+        path = urlParts.pathname.split("/storage/v1/object/sign/uploads/")[1];
+      }
+      // Try to extract from any uploads path
+      else if (urlParts.pathname.includes("/uploads/")) {
+        const pathParts = urlParts.pathname.split("/uploads/");
+        path = "announcement/" + pathParts[pathParts.length - 1];
+      }
 
       if (!path) {
-        throw new Error("Invalid file path extracted.");
+        throw new Error(
+          "Could not extract file path from URL. Expected Supabase storage URL format."
+        );
       }
 
       return decodeURIComponent(path);

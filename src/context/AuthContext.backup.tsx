@@ -37,35 +37,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState<boolean>(false);
   const [initializing, setInitializing] = useState<boolean>(true);
 
-  console.log("Session", session);
-  console.log("User:", user);
-  console.log("UserRole:", userRole);
-
   // Check if user is logged in when app starts
   useEffect(() => {
     setInitializing(true);
 
     const initAuth = async () => {
-      console.log("🔄 InitAuth starting...");
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
-      console.log("InitAuth session:", session);
       setSession(session);
       setUser(session?.user ?? null);
 
       if (session?.user?.email) {
-        console.log("InitAuth fetching role for:", session.user.email);
         const role = await fetchUserRole(session?.user?.email);
-        console.log(" InitAuth role fetched:", role);
         setUserRole(role);
       } else {
-        console.log("InitAuth no session/email, setting role to null");
         setUserRole(null);
       }
-
-      console.log("InitAuth complete");
       setInitializing(false);
     };
 
@@ -91,7 +80,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch user by role
   const fetchUserRole = async (email: string): Promise<UserRole | null> => {
     try {
-      console.log("Fetching role for email:", email);
       const { data, error } = await supabase
         .from("users")
         .select("role")
@@ -103,18 +91,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
 
-      console.log("Role data from database:", data);
-
       if (
         data?.role === "admin" ||
         data?.role === "teacher" ||
         data?.role === "parent"
       ) {
-        console.log("Role matched, returning:", data.role);
         return data.role as UserRole;
       }
 
-      console.log("Role did not match expected values:", data?.role);
       return null;
     } catch (error) {
       console.error("Unexpected error fetching user role:", error);

@@ -1,17 +1,22 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { attendStudent, timeOutStudent, updateAttendanceTime } from "@/services/attendance.service";
+import {
+  attendStudent,
+  timeOutStudent,
+  updateAttendanceTime,
+} from "@/services/attendance.service";
 import { toast } from "sonner";
 import { useState } from "react";
-import { formatDateForSupabase } from "@/lib/utils";
+import { format } from "date-fns";
 
 export const useAttendanceActions = (classId: string, date?: Date) => {
   const queryClient = useQueryClient();
   const [loadingStudents, setLoadingStudents] = useState<Set<string>>(
     new Set()
   );
-  const dateString = date
-    ? formatDateForSupabase(date)
-    : formatDateForSupabase(new Date());
+  // Format the date to match it on date object in supabase
+  const formatDate = date
+    ? format(date, "yyyy-MM-dd")
+    : format(new Date(), "yyyy-MM-dd");
 
   const attendMutation = useMutation({
     mutationFn: (studentId: string) => attendStudent(studentId, date),
@@ -31,7 +36,7 @@ export const useAttendanceActions = (classId: string, date?: Date) => {
         return newSet;
       });
       queryClient.invalidateQueries({
-        queryKey: ["students", classId, dateString],
+        queryKey: ["students", classId, formatDate],
       });
     },
   });
@@ -56,7 +61,7 @@ export const useAttendanceActions = (classId: string, date?: Date) => {
         return newSet;
       });
       queryClient.invalidateQueries({
-        queryKey: ["students", classId, dateString],
+        queryKey: ["students", classId, formatDate],
       });
     },
   });
@@ -70,15 +75,19 @@ export const useAttendanceActions = (classId: string, date?: Date) => {
   };
 
   const timeEditMutation = useMutation({
-    mutationFn: ({ attendanceId, timeType, newTime }: { 
-      attendanceId: string; 
-      timeType: 'time_in' | 'time_out'; 
-      newTime: string 
+    mutationFn: ({
+      attendanceId,
+      timeType,
+      newTime,
+    }: {
+      attendanceId: string;
+      timeType: "time_in" | "time_out";
+      newTime: string;
     }) => updateAttendanceTime(attendanceId, timeType, newTime),
     onSuccess: () => {
       toast("Time updated successfully!");
       queryClient.invalidateQueries({
-        queryKey: ["students", classId, dateString],
+        queryKey: ["students", classId, formatDate],
       });
     },
     onError: (error) => {
@@ -88,7 +97,11 @@ export const useAttendanceActions = (classId: string, date?: Date) => {
     },
   });
 
-  const handleTimeEdit = (attendanceId: string, timeType: 'time_in' | 'time_out', newTime: string) => {
+  const handleTimeEdit = (
+    attendanceId: string,
+    timeType: "time_in" | "time_out",
+    newTime: string
+  ) => {
     timeEditMutation.mutate({ attendanceId, timeType, newTime });
   };
 

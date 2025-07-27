@@ -14,7 +14,6 @@ export async function createAdminUser(email: string, password: string) {
 
     if (error) throw error;
 
-    console.log("Admin user created:", data);
     return data;
   } catch (error) {
     console.error("Error creating admin user:", error);

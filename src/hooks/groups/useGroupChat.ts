@@ -115,8 +115,6 @@ export function useGroupChat({ groupId }: UseGroupChatProps) {
           }
         )
         .subscribe((status) => {
-          console.log(`Channel status for group ${groupId}:`, status);
-
           // Check if component is still mounted
           if (!isMountedRef.current) return;
 
