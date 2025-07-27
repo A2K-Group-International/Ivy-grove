@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, QrCode, Search } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 
 // import AddStudentForm from "@/components/attendance/AddStudentForm";
 import StudentCard from "@/components/attendance/StudentCard";
@@ -10,7 +10,6 @@ import AttendanceStatsSkeleton from "@/components/skeletons.tsx/AttendanceStatsS
 import StudentsListSkeleton from "@/components/skeletons.tsx/StudentsListSkeleton";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -32,6 +31,7 @@ import { useAttendanceActions } from "@/hooks/attendance/useAttendanceActions";
 import { useAttendanceData } from "@/hooks/attendance/useAttendanceData";
 import { useClassData } from "@/hooks/attendance/useClassData";
 import { useClassSelection } from "@/hooks/attendance/useClassSelection";
+import QRScanner from "@/components/attendance/QRScanner";
 
 const Attendance = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // State for the date
@@ -53,8 +53,13 @@ const Attendance = () => {
     error,
   } = useAttendanceData(classId, selectedDate);
 
-  const { handleCheckIn, handleCheckOut, handleTimeEdit, isStudentLoading } =
-    useAttendanceActions(classId, selectedDate);
+  const {
+    handleCheckIn,
+    handleCheckOut,
+    handleTimeEdit,
+    isStudentLoading,
+    handleDeleteAttendance,
+  } = useAttendanceActions(classId, selectedDate);
 
   return (
     <>
@@ -116,10 +121,8 @@ const Attendance = () => {
         </div>
 
         <div className="flex gap-2">
-          {/* <AddStudentForm /> */}
-          <Button>
-            <QrCode />
-          </Button>
+          {/* QR SCANNER /> */}
+          <QRScanner />
         </div>
       </div>
 
@@ -139,13 +142,13 @@ const Attendance = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="relative mb-4">
+      {/* <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
           placeholder="Search students by name, ID, or email..."
           className="pl-10"
         />
-      </div>
+      </div> */}
 
       {/* Scrollable Student List */}
       <div className="flex-1 overflow-y-auto space-y-2">
@@ -165,6 +168,7 @@ const Attendance = () => {
               onCheckIn={handleCheckIn}
               onCheckOut={handleCheckOut}
               onTimeEdit={handleTimeEdit}
+              onDeleteAttendance={handleDeleteAttendance}
               isStudentLoading={isStudentLoading}
             />
           ))

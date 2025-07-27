@@ -1,6 +1,6 @@
 import { formatTime } from "@/lib/utils";
 import type { Student } from "@/types/attendance";
-import { LogIn, LogOut, Timer, Edit2, Check, X } from "lucide-react";
+import { LogIn, LogOut, Edit2, Check, X } from "lucide-react";
 import { useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -50,7 +50,7 @@ const StudentTimeInfo = ({
   };
 
   return (
-    <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
+    <div className="flex flex-col gap-y-2 text-xs text-gray-500">
       {timeIn && (
         <div className="flex items-center gap-1">
           <LogIn className="h-3 w-3" />
@@ -61,7 +61,7 @@ const StudentTimeInfo = ({
                 type="time"
                 value={tempTimeIn}
                 onChange={(e) => setTempTimeIn(e.target.value)}
-                className="h-6 w-20 text-xs"
+                className="text-xs"
               />
               <Button
                 size="sm"
@@ -107,7 +107,7 @@ const StudentTimeInfo = ({
                 type="time"
                 value={tempTimeOut}
                 onChange={(e) => setTempTimeOut(e.target.value)}
-                className="h-6 w-20 text-xs"
+                className="text-xs"
               />
               <Button
                 size="sm"
@@ -141,11 +141,6 @@ const StudentTimeInfo = ({
               )}
             </div>
           )}
-        </div>
-      )}
-      {timeIn && timeOut && (
-        <div className="flex items-center gap-1">
-          <Timer className="h-3 w-3" />
         </div>
       )}
     </div>

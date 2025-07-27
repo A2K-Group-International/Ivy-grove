@@ -3,6 +3,7 @@ import {
   attendStudent,
   timeOutStudent,
   updateAttendanceTime,
+  deleteStudentAttendance,
 } from "@/services/attendance.service";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -66,6 +67,31 @@ export const useAttendanceActions = (classId: string, date?: Date) => {
     },
   });
 
+  const deleteAttendanceMutation = useMutation({
+    mutationFn: (attendanceId: string) => deleteStudentAttendance(attendanceId),
+    onMutate: (attendanceId: string) => {
+      setLoadingStudents((prev) => new Set(prev).add(attendanceId));
+    },
+    onSuccess: () => {
+      toast("Attendance deleted successfully!");
+    },
+    onError: (error) => {
+      toast(`Error deleting attendance: ${error.message}`, {
+        className: "bg-red-500 text-white",
+      });
+    },
+    onSettled: (_data, _error, attendanceId) => {
+      setLoadingStudents((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(attendanceId);
+        return newSet;
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["students", classId, formatDate],
+      });
+    },
+  });
+
   const handleCheckIn = (studentId: string) => {
     attendMutation.mutate(studentId);
   };
@@ -105,6 +131,12 @@ export const useAttendanceActions = (classId: string, date?: Date) => {
     timeEditMutation.mutate({ attendanceId, timeType, newTime });
   };
 
+  const handleDeleteAttendance = (attendanceId?: string) => {
+    if (attendanceId) {
+      deleteAttendanceMutation.mutate(attendanceId);
+    }
+  };
+
   const isStudentLoading = (studentId: string) => {
     return loadingStudents.has(studentId);
   };
@@ -113,6 +145,7 @@ export const useAttendanceActions = (classId: string, date?: Date) => {
     handleCheckIn,
     handleCheckOut,
     handleTimeEdit,
+    handleDeleteAttendance,
     isStudentLoading,
   };
 };

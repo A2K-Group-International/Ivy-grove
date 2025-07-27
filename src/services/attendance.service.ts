@@ -78,3 +78,18 @@ export const updateAttendanceTime = async (
     throw new Error(`Failed to update ${timeType}: ${error.message}`);
   }
 };
+
+export const deleteStudentAttendance = async (attendanceId: string) => {
+  if (!attendanceId) {
+    throw new Error("Attendance ID is required");
+  }
+
+  const { error } = await supabase
+    .from("attendance")
+    .delete()
+    .eq("id", attendanceId);
+
+  if (error) {
+    throw new Error(`Failed to delete attendance ${error.message}`);
+  }
+};

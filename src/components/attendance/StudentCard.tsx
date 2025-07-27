@@ -2,7 +2,7 @@ import { getInitial } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import type { Student } from "@/types/attendance";
 import StudentTimeInfo from "./StudentTimeInfo";
-import { LogIn, LogOut } from "lucide-react";
+import { LogIn, LogOut, RefreshCw } from "lucide-react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 
@@ -11,6 +11,7 @@ const StudentCard = ({
   onCheckIn,
   onCheckOut,
   onTimeEdit,
+  onDeleteAttendance,
   isStudentLoading,
 }: {
   student: Student;
@@ -21,6 +22,7 @@ const StudentCard = ({
     timeType: "time_in" | "time_out",
     newTime: string
   ) => void;
+  onDeleteAttendance: (attendanceId?: string) => void;
   isStudentLoading: (id: string) => boolean;
 }) => {
   const timeIn = student.attendance[0]?.time_in;
@@ -34,6 +36,8 @@ const StudentCard = ({
       return <Badge className="bg-blue-500">Checked in</Badge>;
     }
   };
+
+  console.log(student);
 
   return (
     <div className="flex flex-col md:flex-row md:justify-between gap-y-2 p-4 rounded-lg border bg-white hover:shadow-sm transition-all duration-200">
@@ -80,6 +84,15 @@ const StudentCard = ({
             >
               <LogOut className="h-4 w-4" />
               {isStudentLoading(student.id) ? "Checking Out..." : "Check Out"}
+            </Button>
+          )}
+          {timeIn && timeOut && (
+            <Button
+              variant="ghost"
+              onClick={() => onDeleteAttendance(student.attendance[0]?.id)}
+              disabled={isStudentLoading(student.id)}
+            >
+              <RefreshCw />
             </Button>
           )}
         </div>
