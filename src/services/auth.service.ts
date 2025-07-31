@@ -135,35 +135,35 @@ export class AuthService {
     address: string
   ): Promise<UserProfile> {
     try {
-      // Sign up user
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
+      // Edge Function to create teacher
+      const { data, error } = await supabase.functions.invoke(
+        "create-teacher-account",
+        {
+          body: {
+            email,
+            password,
+            first_name,
+            last_name,
+            contact,
+            address,
+          },
+        }
+      );
 
       if (error) {
-        console.error("Supabase signUp error:", {
-          message: error.message,
-          details: error,
-        });
+        console.error("Edge function error:", error);
         throw error;
       }
 
-      if (!data?.user?.id) {
-        throw new Error("User id  is not found");
+      if (data?.error || !data?.success) {
+        throw new Error(data?.error || "User creation failed");
       }
 
-      const profile = await this.createAccount(
-        data.user.id,
-        email,
-        first_name,
-        last_name,
-        contact,
-        address,
-        "teacher" // role
-      );
+      if (!data?.data) {
+        throw new Error("User creation failed");
+      }
 
-      return profile;
+      return data.data;
     } catch (error) {
       console.error("Error creating teacher:", error);
       throw error;
@@ -179,35 +179,35 @@ export class AuthService {
     address: string
   ): Promise<UserProfile> {
     try {
-      // Sign up user
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
+      // Edge Function to create parent
+      const { data, error } = await supabase.functions.invoke(
+        "create-parent-account",
+        {
+          body: {
+            email,
+            password,
+            first_name,
+            last_name,
+            contact,
+            address,
+          },
+        }
+      );
 
       if (error) {
-        console.error("Supabase signUp error:", {
-          message: error.message,
-          details: error,
-        });
+        console.error("Edge function error:", error);
         throw error;
       }
 
-      if (!data?.user?.id) {
-        throw new Error("User id  is not found");
+      if (data?.error || !data?.success) {
+        throw new Error(data?.error || "User creation failed");
       }
 
-      const profile = await this.createAccount(
-        data.user.id,
-        email,
-        first_name,
-        last_name,
-        contact,
-        address,
-        "parent" // role
-      );
+      if (!data?.data) {
+        throw new Error("User creation failed");
+      }
 
-      return profile;
+      return data.data;
     } catch (error) {
       console.error("Error creating parent:", error);
       throw error;

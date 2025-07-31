@@ -71,6 +71,24 @@ export const addStudentToClass = async ({
   }
 };
 
+export const removeStudentToClass = async ({
+  studentId,
+}: {
+  studentId: string;
+}) => {
+  if (!studentId) {
+    throw new Error("student ID is required");
+  }
+  const { error } = await supabase
+    .from("class_students")
+    .delete()
+    .eq("student_id", studentId);
+
+  if (error) {
+    throw new Error(`Failed to remove student to class: ${error.message}`);
+  }
+};
+
 export const fetchAllClasses = async (schoolYearId: string | undefined) => {
   if (!schoolYearId) {
     throw new Error("School year ID is required");

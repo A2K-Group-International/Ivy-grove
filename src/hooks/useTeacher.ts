@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AuthService } from "@/services/auth.service";
 import { UserService, type UserProfile } from "@/services/user.service";
+import { toast } from "sonner";
 
 // Query keys for caching
 export const TEACHER_KEYS = {
@@ -51,9 +52,11 @@ export function useCreateTeacher() {
       queryClient.invalidateQueries({ queryKey: TEACHER_KEYS.all });
       // Also invalidate paginated queries
       queryClient.invalidateQueries({ queryKey: ["teachers", "paginated"] });
+      toast.success("Teacher created successfully!");
     },
     onError: (error) => {
       console.error("Failed to create teacher:", error);
+      toast.error(error.message || "Failed to create teacher");
     },
   });
 }

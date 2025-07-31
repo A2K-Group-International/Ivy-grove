@@ -42,11 +42,13 @@ const AnnouncementForm = ({
   const [currentFiles, setCurrentFiles] = useState<File[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFileType, setSelectedFileTypes] = useState(
-    files ? "Image(s)" : "None"
+    files ? "Mixed" : "None"
   );
-  const [selectedVideo, setSelectedVideo] = useState("");
-  const [selectedPDF, setSelectedPDF] = useState("");
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [filePreviews, setFilePreviews] = useState<
+    { id: string; url: string; type: string; name: string }[]
+  >([]);
+  const [dragOver, setDragOver] = useState(false);
+
   const form = useForm({
     resolver: zodResolver(AnnouncementSchema),
     defaultValues: {
@@ -59,32 +61,51 @@ const AnnouncementForm = ({
   const { addAnnouncementMutation, editAnnouncementMutation } =
     useAnnouncements(null);
 
-  console.log("Files in AnnouncementForm:", form.getValues("files"));
-
   const onSubmit = (data: AnnouncementSchemaType) => {
     if (title) {
-      editAnnouncementMutation.mutate({
-        title: data.title,
-        content: data.content,
-        files: data.files,
-        announcementId: announcementId,
-      });
+      editAnnouncementMutation.mutate(
+        {
+          title: data.title,
+          content: data.content,
+          files: data.files,
+          announcementId: announcementId,
+        },
+        {
+          onSuccess: () => {
+            setIsOpen(false);
+            form.reset();
+            setCurrentFiles([]);
+            setSelectedFileTypes("None");
+            setFilePreviews([]);
+          },
+        }
+      );
     } else {
-      addAnnouncementMutation.mutate({
-        title: data.title,
-        content: data.content,
-        files: data.files,
-        created_by: userProfile?.id,
-      });
+      addAnnouncementMutation.mutate(
+        {
+          title: data.title,
+          content: data.content,
+          files: data.files,
+          created_by: userProfile?.id,
+        },
+        {
+          onSuccess: () => {
+            setIsOpen(false);
+            form.reset();
+            setCurrentFiles([]);
+            setSelectedFileTypes("None");
+            setFilePreviews([]);
+          },
+        }
+      );
     }
 
-    form.reset();
-    setCurrentFiles([]);
-    setSelectedFileTypes("None");
-    setSelectedVideo("");
-    setSelectedPDF("");
-    setImagePreviews([]);
-    setIsOpen(false);
+    // Clean up object URLs
+    filePreviews.forEach((preview) => {
+      if (preview.url.startsWith("blob:")) {
+        URL.revokeObjectURL(preview.url);
+      }
+    });
   };
 
   useEffect(() => {
@@ -100,7 +121,14 @@ const AnnouncementForm = ({
 
         form.setValue("files", fileObjects);
         setCurrentFiles(fileObjects);
-        setImagePreviews(files.map((file) => file.url));
+        setFilePreviews(
+          files.map((file, index) => ({
+            id: `existing-${index}`,
+            url: file.url,
+            type: file.type,
+            name: file.name,
+          }))
+        );
       };
 
       fetchFiles();
@@ -108,8 +136,11 @@ const AnnouncementForm = ({
   }, [files, form]);
 
   const handleRemoveFile = (index: number) => {
-    if (imagePreviews[index]) {
-      URL.revokeObjectURL(imagePreviews[index]);
+    const preview = filePreviews[index];
+
+    // Only revoke object URLs for newly created previews (not existing file URLs)
+    if (preview && preview.url.startsWith("blob:")) {
+      URL.revokeObjectURL(preview.url);
     }
 
     const filesValue = form.getValues("files") || [];
@@ -119,10 +150,105 @@ const AnnouncementForm = ({
 
     form.setValue("files", updatedFiles);
     setCurrentFiles(updatedFiles);
+    setFilePreviews((prev) => prev.filter((_, i) => i !== index));
 
-    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const validateFile = (file: File): { isValid: boolean; error?: string } => {
+    const maxSize = 50 * 1024 * 1024; // 50MB limit
+
+    if (file.size > maxSize) {
+      return { isValid: false, error: "File size must be less than 50MB" };
+    }
+
+    const allowedTypes = [
+      // Images
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/bmp",
+      // Videos
+      "video/mp4",
+      "video/mpeg",
+      "video/quicktime",
+      "video/x-msvideo",
+      "video/webm",
+      // Documents
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "text/plain",
+      "text/csv",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      return {
+        isValid: false,
+        error:
+          "File type not supported. Please select images, videos, or documents.",
+      };
+    }
+
+    return { isValid: true };
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    if (droppedFiles.length === 0) return;
+
+    processFiles(droppedFiles);
+  };
+
+  const processFiles = (fileList: File[]) => {
+    const validFiles = [];
+    const errors = [];
+
+    // Validate all files
+    for (const file of fileList) {
+      const validation = validateFile(file);
+      if (validation.isValid) {
+        validFiles.push(file);
+      } else {
+        errors.push(`${file.name}: ${validation.error}`);
+      }
+    }
+
+    // Add all valid files immediately for instant previews
+    if (validFiles.length > 0) {
+      const newFiles = [...currentFiles, ...validFiles];
+      form.setValue("files", newFiles);
+      setCurrentFiles(newFiles);
+
+      const newPreviews = validFiles.map((file, index) => ({
+        id: `new-${Date.now()}-${index}`,
+        url: URL.createObjectURL(file),
+        type: file.type,
+        name: file.name,
+      }));
+      setFilePreviews((prev) => [...prev, ...newPreviews]);
+    }
+
+    if (errors.length > 0) {
+      alert("Some files were rejected:\\n" + errors.join("\\n"));
     }
   };
 
@@ -132,9 +258,17 @@ const AnnouncementForm = ({
       onOpenChange={(open) => {
         setIsOpen(open);
         if (!open) {
+          // Clean up object URLs
+          filePreviews.forEach((preview) => {
+            if (preview.url.startsWith("blob:")) {
+              URL.revokeObjectURL(preview.url);
+            }
+          });
+
           form.reset();
           setCurrentFiles([]);
-          setImagePreviews([]);
+          setFilePreviews([]);
+          setSelectedFileTypes(files ? "Mixed" : "None");
           if (fileInputRef.current) {
             fileInputRef.current.value = "";
           }
@@ -205,7 +339,7 @@ const AnnouncementForm = ({
             <FormField
               control={form.control}
               name="files"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormControl>
                     <Input
@@ -213,52 +347,56 @@ const AnnouncementForm = ({
                       id="file-input"
                       type="file"
                       accept={
-                        selectedFileType === "Image(s)"
+                        selectedFileType === "Mixed"
+                          ? "image/*,video/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/csv"
+                          : selectedFileType === "Image(s)"
                           ? "image/*"
                           : selectedFileType === "Video"
                           ? "video/*"
-                          : "application/*"
+                          : "application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/csv"
                       }
                       className="hidden"
-                      multiple={selectedFileType === "Image(s)"}
+                      multiple={true}
                       onChange={(e) => {
                         const files = e.target.files;
                         if (!files || files.length === 0) return;
 
-                        if (selectedFileType === "Image(s)") {
-                          const fileArray = Array.from(files);
+                        const fileArray = Array.from(files);
 
-                          field.onChange([...currentFiles, ...fileArray]);
-                          setCurrentFiles((prevState) => [
-                            ...prevState,
-                            ...fileArray,
-                          ]);
-
-                          setImagePreviews((prevState) => [
-                            ...prevState,
-                            ...fileArray.map((file) =>
-                              URL.createObjectURL(file)
-                            ),
-                          ]);
-                          if (fileInputRef.current) {
-                            fileInputRef.current.value = "";
-                          }
+                        if (selectedFileType === "Mixed") {
+                          // Accept all supported file types
+                          processFiles(fileArray);
                         } else {
-                          const file = files[0];
-                          if (file) {
-                            const url = URL.createObjectURL(file);
-
-                            if (file.type.startsWith("application")) {
-                              setSelectedPDF(url);
-                            } else {
-                              setSelectedVideo(url);
+                          // Filter files based on selected type
+                          const filteredFiles = fileArray.filter((file) => {
+                            if (selectedFileType === "Image(s)") {
+                              return file.type.startsWith("image/");
+                            } else if (selectedFileType === "Video") {
+                              return file.type.startsWith("video/");
+                            } else if (selectedFileType === "PDF Document") {
+                              return (
+                                file.type.startsWith("application/") ||
+                                file.type.startsWith("text/")
+                              );
                             }
+                            return false;
+                          });
 
-                            form.setValue("files", [file]);
-                            if (fileInputRef.current) {
-                              fileInputRef.current.value = "";
-                            }
+                          if (filteredFiles.length !== fileArray.length) {
+                            const rejectedCount =
+                              fileArray.length - filteredFiles.length;
+                            alert(
+                              `${rejectedCount} file(s) were rejected because they don't match the selected file type.`
+                            );
                           }
+
+                          if (filteredFiles.length > 0) {
+                            processFiles(filteredFiles);
+                          }
+                        }
+
+                        if (fileInputRef.current) {
+                          fileInputRef.current.value = "";
                         }
                       }}
                     />
@@ -277,11 +415,16 @@ const AnnouncementForm = ({
                   <div
                     key={index}
                     onClick={() => {
-                      setImagePreviews([]);
+                      // Clean up existing object URLs
+                      filePreviews.forEach((preview) => {
+                        if (preview.url.startsWith("blob:")) {
+                          URL.revokeObjectURL(preview.url);
+                        }
+                      });
+
+                      setFilePreviews([]);
                       setSelectedFileTypes(value);
                       setCurrentFiles([]);
-                      setSelectedVideo("");
-                      setSelectedPDF("");
                       form.setValue("files", []);
                     }}
                     className={cn(
@@ -302,89 +445,118 @@ const AnnouncementForm = ({
               </div>
               <Separator />
 
-              {selectedFileType === "Image(s)" && (
-                <div className="flex max-h-[120px] w-full max-w-[420px] gap-3 overflow-x-scroll">
-                  {imagePreviews.map((url, index) => (
-                    <div
-                      key={index}
-                      className="relative flex h-[100px] w-[100px] flex-shrink-0 rounded-md border overflow-hidden"
-                    >
-                      <ImageLoader
-                        className="object-cover"
-                        src={url}
-                        alt="an image"
-                      />
-                      <Icon
-                        onClick={() => handleRemoveFile(index)}
-                        className="absolute h-6 w-6 right-1 top-1 text-xl text-red-500 rounded-full p-1 hover:cursor-pointer "
-                        icon={"mingcute:close-circle-fill"}
-                      />
-                    </div>
-                  ))}
-                  <Label htmlFor="file-input">
-                    <div className="flex h-[100px] w-[100px] flex-shrink-0 items-center justify-center rounded-md border  hover:cursor-pointer  transition-colors">
-                      <Icon className="h-9 w-9 " icon={"mingcute:add-line"} />
-                    </div>
-                  </Label>
+              {(selectedFileType === "Mixed" ||
+                selectedFileType === "Image(s)" ||
+                selectedFileType === "Video" ||
+                selectedFileType === "PDF Document") && (
+                <div className="relative">
+                  <div
+                    className={cn(
+                      "flex gap-3 p-2 rounded-lg transition-colors",
+                      "overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100",
+                      dragOver ? "bg-blue-50 border-blue-300" : "bg-gray-50"
+                    )}
+                    style={{
+                      maxHeight: "100px",
+                      minHeight: "100px",
+                    }}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    {filePreviews.map((preview, index) => {
+                      const isImage = preview.type.startsWith("image/");
+                      const isVideo = preview.type.startsWith("video/");
+                      const isPdf = preview.type === "application/pdf";
+
+                      return (
+                        <div
+                          key={preview.id}
+                          className="group relative flex h-[80px] w-[80px] flex-shrink-0 rounded-lg border-2 border-gray-200 overflow-hidden hover:border-gray-300 transition-all"
+                        >
+                          {isImage && (
+                            <ImageLoader
+                              className="object-cover w-full h-full"
+                              src={preview.url}
+                              alt={preview.name}
+                            />
+                          )}
+                          {isVideo && (
+                            <video
+                              className="object-cover w-full h-full"
+                              src={preview.url}
+                              muted
+                            />
+                          )}
+                          {!isImage && !isVideo && (
+                            <div className="bg-white flex flex-col items-center justify-center w-full h-full p-1">
+                              <Icon
+                                className={cn(
+                                  "h-6 w-6 mb-1",
+                                  isPdf ? "text-red-500" : "text-gray-500"
+                                )}
+                                icon={
+                                  isPdf
+                                    ? "mingcute:file-pdf-fill"
+                                    : "mingcute:file-fill"
+                                }
+                              />
+                              <p
+                                className="text-xs text-center truncate w-full"
+                                title={preview.name}
+                              >
+                                {preview.name.length > 8
+                                  ? preview.name.substring(0, 8) + "..."
+                                  : preview.name}
+                              </p>
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFile(index)}
+                            className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                            aria-label={`Remove ${
+                              isImage ? "image" : isVideo ? "video" : "file"
+                            }`}
+                          >
+                            <Icon
+                              className="h-2.5 w-2.5"
+                              icon="mingcute:close-line"
+                            />
+                          </button>
+                        </div>
+                      );
+                    })}
+                    <Label htmlFor="file-input">
+                      <div
+                        className={cn(
+                          "flex h-[80px] w-[80px] flex-shrink-0 items-center justify-center rounded-lg border-2 border-dashed transition-all cursor-pointer",
+                          dragOver
+                            ? "border-blue-400 bg-blue-50"
+                            : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                        )}
+                      >
+                        <div className="text-center">
+                          <Icon
+                            className="h-6 w-6 mx-auto mb-1 text-gray-400"
+                            icon="mingcute:add-line"
+                          />
+                          <p className="text-xs text-gray-500">
+                            {selectedFileType === "Mixed"
+                              ? "Add Files"
+                              : selectedFileType === "Image(s)"
+                              ? "Images"
+                              : selectedFileType === "Video"
+                              ? "Video"
+                              : "Docs"}
+                          </p>
+                        </div>
+                      </div>
+                    </Label>
+                  </div>
                 </div>
               )}
-
-              {selectedFileType === "Video" &&
-                (selectedVideo ? (
-                  <div className="flex max-h-[110px] w-full max-w-[420px] justify-center gap-3 overflow-x-scroll">
-                    <div className="relative flex h-[100px] w-[100px] flex-shrink-0 rounded-md border  overflow-hidden">
-                      <video
-                        controls={true}
-                        src={selectedVideo}
-                        className="object-cover"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <Label htmlFor="file-input">
-                    <div className="flex h-[110px] flex-col items-center justify-center hover:cursor-pointer hover:bg-school-200 transition-colors rounded-lg">
-                      <div className="flex flex-shrink-0 items-center justify-center rounded-md">
-                        <Icon
-                          className="h-11 w-11 "
-                          icon={"mingcute:video-fill"}
-                        />
-                      </div>
-                      <p className="text-[12px] font-semibold ">Upload Video</p>
-                    </div>
-                  </Label>
-                ))}
-              {selectedFileType === "PDF Document" &&
-                (selectedPDF ? (
-                  <div className="flex max-h-[110px] w-full max-w-[420px] items-center justify-center gap-3 overflow-x-scroll">
-                    <div className="relative h-[100px] w-[100px] flex-shrink-0 rounded-md border  bg-school-200 flex items-center justify-center">
-                      <Icon
-                        className="h-11 w-11 "
-                        icon={"mingcute:attachment-2-fill"}
-                      />
-                      <p className="text-xs  absolute bottom-1 left-1 right-1 truncate">
-                        {(() => {
-                          const files = form.getValues("files");
-                          const fileArray = Array.isArray(files)
-                            ? files
-                            : [files];
-                          return fileArray[0]?.name || "Unknown file";
-                        })()}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <Label htmlFor="file-input">
-                    <div className="flex h-[110px] flex-col items-center justify-center hover:cursor-pointer hover:bg-school-200 transition-colors rounded-lg">
-                      <div className="flex flex-shrink-0 items-center justify-center rounded-md">
-                        <Icon
-                          className="h-11 w-11 "
-                          icon={"mingcute:attachment-2-fill"}
-                        />
-                      </div>
-                      <p className="text-[12px] font-semibold ">Upload File</p>
-                    </div>
-                  </Label>
-                ))}
             </div>
             {form.formState.errors.files && (
               <p className="text-sm font-medium text-red-600 mb-4">
@@ -394,10 +566,24 @@ const AnnouncementForm = ({
             <AlertDialogFooter>
               <AlertDialogCancel className="  flex-1">Cancel</AlertDialogCancel>
               <Button
-                className="flex-1 bg-school-600 hover:bg-school-700 text-white"
+                className="flex-1 bg-school-600 hover:bg-school-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 type="submit"
+                disabled={
+                  addAnnouncementMutation.isPending ||
+                  editAnnouncementMutation.isPending
+                }
               >
-                {addAnnouncementMutation.isPending ? "Posting..." : "Post"}
+                {addAnnouncementMutation.isPending ||
+                editAnnouncementMutation.isPending ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    {title ? "Updating..." : "Posting..."}
+                  </div>
+                ) : title ? (
+                  "Update"
+                ) : (
+                  "Post"
+                )}
               </Button>
             </AlertDialogFooter>
           </form>

@@ -28,6 +28,7 @@ import type { Group } from "@/pages/Protected/Groups";
 import CustomReactSelect from "../CustomReactSelect";
 
 import RemoveGroupMembers from "./RemoveGroupMembers";
+import { useAuth } from "@/context/AuthContext";
 
 const formSchema = z.object({
   userIds: z.array(z.string()).min(1, "Please select at least one member"),
@@ -39,6 +40,9 @@ interface AddGroupMembersProps {
 
 const AddGroupMembers = ({ group }: AddGroupMembersProps) => {
   const [open, setOpen] = useState(false);
+  const { userProfile } = useAuth();
+  const isAdmin = userProfile?.role === "admin";
+
   const {
     addMembers,
     isAdding,
@@ -76,47 +80,53 @@ const AddGroupMembers = ({ group }: AddGroupMembersProps) => {
       <DialogTrigger asChild>
         <Button className="flex items-center gap-2">
           <UserPlus className="h-4 w-4" />
-          Add Members
+          {isAdmin ? "Add Members" : "View Members"}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add Members to {group.name}</DialogTitle>
+          <DialogTitle>
+            {isAdmin ? `Add Members to ${group.name}` : `${group.name}`}
+          </DialogTitle>
           <DialogDescription>
-            Select users to add to this group.
+            {isAdmin
+              ? "Select users to add to this group."
+              : "View current members of this group."}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="userIds"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Select Members</FormLabel>
-                  <FormControl>
-                    <CustomReactSelect
-                      isMulti
-                      options={userOptions}
-                      value={userOptions.filter((option) =>
-                        field.value.includes(option.value)
-                      )}
-                      onChange={(selected) => {
-                        const values = Array.isArray(selected)
-                          ? selected.map((option) => option.value)
-                          : [];
-                        field.onChange(values);
-                      }}
-                      placeholder="Select members to add..."
-                      isLoading={isLoadingUsers}
-                      isDisabled={isLoadingUsers}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {isAdmin && (
+              <FormField
+                control={form.control}
+                name="userIds"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Select Members</FormLabel>
+                    <FormControl>
+                      <CustomReactSelect
+                        isMulti
+                        options={userOptions}
+                        value={userOptions.filter((option) =>
+                          field.value.includes(option.value)
+                        )}
+                        onChange={(selected) => {
+                          const values = Array.isArray(selected)
+                            ? selected.map((option) => option.value)
+                            : [];
+                          field.onChange(values);
+                        }}
+                        placeholder="Select members to add..."
+                        isLoading={isLoadingUsers}
+                        isDisabled={isLoadingUsers}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             {/* Current Members List */}
             <div className="space-y-3">
@@ -157,12 +167,14 @@ const AddGroupMembers = ({ group }: AddGroupMembersProps) => {
                           {new Date(member.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <div>
-                        <RemoveGroupMembers
-                          groupId={group.id}
-                          userId={member.user_id}
-                        />
-                      </div>
+                      {isAdmin && (
+                        <div>
+                          <RemoveGroupMembers
+                            groupId={group.id}
+                            userId={member.user_id}
+                          />
+                        </div>
+                      )}
                     </div>
                   ))
                 ) : (
@@ -176,18 +188,20 @@ const AddGroupMembers = ({ group }: AddGroupMembersProps) => {
             <DialogFooter>
               <Button
                 type="button"
-                variant="outline"
+                variant={isAdmin ? "outline" : "default"}
                 onClick={() => setOpen(false)}
                 disabled={isAdding}
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isAdding || userOptions.length === 0}
-              >
-                {isAdding ? "Adding..." : "Add Members"}
-              </Button>
+              {isAdmin && (
+                <Button
+                  type="submit"
+                  disabled={isAdding || userOptions.length === 0}
+                >
+                  {isAdding ? "Adding..." : "Add Members"}
+                </Button>
+              )}
             </DialogFooter>
           </form>
         </Form>
