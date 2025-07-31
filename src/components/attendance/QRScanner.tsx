@@ -125,16 +125,24 @@ const QRScanner = ({ students, onCheckIn, onCheckOut }: QRScannerProps) => {
               </div>
               <div className="border rounded-lg p-4">
                 <h3 className="font-semibold text-lg mb-2">
-                  Parent Information
+                  {foundStudent.students?.parent_id
+                    ? "Parent Information"
+                    : "No Parent Information"}
                 </h3>
-                <div className="space-y-1 text-sm">
-                  <p className="font-medium">
-                    {`Name: ${foundStudent.students.parent_id?.first_name} ${foundStudent.students.parent_id?.last_name}`}
-                  </p>
-                  <p className="font-medium">
-                    {`Address: ${foundStudent.students.parent_id?.address}`}
-                  </p>
-                </div>
+                {foundStudent.students?.parent_id && (
+                  <div className="space-y-1 text-sm">
+                    <p>
+                      <span className="font-medium">Name:</span>{" "}
+                      {foundStudent.students.parent_id.first_name}{" "}
+                      {foundStudent.students.parent_id.last_name}
+                    </p>
+                    <p>
+                      <span className="font-medium">Address:</span>{" "}
+                      {foundStudent.students.parent_id.address ||
+                        "No address provided"}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           )}
