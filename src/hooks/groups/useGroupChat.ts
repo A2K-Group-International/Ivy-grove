@@ -121,7 +121,6 @@ export function useGroupChat({ groupId }: UseGroupChatProps) {
           setIsConnected(status === "SUBSCRIBED");
 
           if (status === "SUBSCRIBED") {
-            console.log(`Successfully connected to group ${groupId}`);
             // Reset reconnection attempts on successful connection
             reconnectAttempts = 0;
             if (reconnectTimeoutRef.current) {

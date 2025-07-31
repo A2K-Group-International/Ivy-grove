@@ -59,8 +59,6 @@ const AnnouncementForm = ({
   const { addAnnouncementMutation, editAnnouncementMutation } =
     useAnnouncements(null);
 
-  console.log("Files in AnnouncementForm:", form.getValues("files"));
-
   const onSubmit = (data: AnnouncementSchemaType) => {
     if (title) {
       editAnnouncementMutation.mutate({

@@ -27,8 +27,6 @@ export const createAnnouncements = async ({
 }: CreateAnnouncementType) => {
   const fileData: FileData[] = [];
 
-  console.log("Creating announcement with files:", files);
-
   if (files) {
     const filesArray = Array.isArray(files) ? files : [files];
     await Promise.all(
@@ -252,6 +250,17 @@ export const editAnnouncement = async ({
   if (!announcementId) {
     throw new Error("Announcement ID is required for editing.");
   }
+
+  // Validate that the announcement exists first
+  const { error: announcementError } = await supabase
+    .from("announcements")
+    .select("id")
+    .eq("id", announcementId)
+    .single();
+
+  if (announcementError) {
+    throw new Error(`Announcement not found: ${announcementError.message}`);
+  }
   const { data: existingFiles, error } = await supabase
     .from("announcement_files")
     .select("id,name,url")
@@ -337,9 +346,9 @@ export const editAnnouncement = async ({
         .select("id")
         .eq("announcement_id", announcementId)
         .eq("name", file.name)
-        .single(); // Get a single record
+        .maybeSingle(); // Use maybeSingle() to handle 0 or 1 rows gracefully
 
-      if (selectError && selectError.code !== "PGRST116") {
+      if (selectError) {
         console.error("Error checking existing file:", selectError);
         throw selectError;
       }

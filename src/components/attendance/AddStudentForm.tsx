@@ -37,7 +37,6 @@ const AddStudentForm = () => {
   });
 
   const onSubmit = () => {
-    console.log("Form Submitted:");
     setDialogOpen(false);
   };
 
