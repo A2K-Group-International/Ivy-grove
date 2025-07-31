@@ -9,8 +9,9 @@ import {
 import {
   fetchAllClasses,
   fetchStudentsPerClass,
+  removeStudentToClass,
 } from "@/services/class.service";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { MoreHorizontal } from "lucide-react";
@@ -129,6 +130,7 @@ function Classes({ schoolYearId }: SchoolYearIdProp) {
                   classesName={cls.name}
                   selectedClass={selectedClass.id}
                   schoolYearId={schoolYearId}
+                  classId={cls.id}
                 />
               )}
             </Dialog>
@@ -167,12 +169,14 @@ type StudentListInClassProp = {
   schoolYearId: string;
   selectedClass: string;
   classesName: string;
+  classId: string;
 };
 
 function StudentListInClass({
   schoolYearId,
   selectedClass,
   classesName,
+  classId,
 }: StudentListInClassProp) {
   const {
     data: students,
@@ -182,6 +186,20 @@ function StudentListInClass({
     queryKey: ["students-per-class", selectedClass],
     queryFn: () => fetchStudentsPerClass(selectedClass),
     enabled: !!selectedClass,
+  });
+
+  const queryClient = useQueryClient();
+
+  const removeStudentMutation = useMutation({
+    mutationFn: removeStudentToClass,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["students-per-class", classId],
+      });
+    },
+    onError: (error) => {
+      console.error("Error adding students:", error);
+    },
   });
 
   return (
@@ -239,7 +257,15 @@ function StudentListInClass({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="center">
-                          <DropdownMenuItem>Remove</DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              removeStudentMutation.mutate({
+                                studentId: student.id,
+                              })
+                            }
+                          >
+                            Remove
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
