@@ -86,9 +86,9 @@ const AddStudentToClass = ({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Class</DialogTitle>
+          <DialogTitle>Add Students</DialogTitle>
           <DialogDescription>
-            Fill in the details to create a new class.
+            Select students to add to the class.
           </DialogDescription>
         </DialogHeader>
 
@@ -102,7 +102,7 @@ const AddStudentToClass = ({
               name="ids"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Class Name</FormLabel>
+                  <FormLabel>Student Name</FormLabel>
                   <FormControl>
                     <CustomReactSelect
                       isMulti={true}
@@ -128,7 +128,7 @@ const AddStudentToClass = ({
                 <Button variant="secondary">Close</Button>
               </DialogClose>
               <Button type="submit" disabled={addStudentMutation.isPending}>
-                {addStudentMutation.isPending ? "Creating..." : "Create Class"}
+                {addStudentMutation.isPending ? "Adding..." : "Add Students"}
               </Button>
             </DialogFooter>
           </form>
