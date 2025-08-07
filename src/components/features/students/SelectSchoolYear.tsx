@@ -16,12 +16,14 @@ type SelectSchoolYearProps = {
     onChange: (value: string) => void;
   };
   isLoading: boolean;
+  className?: string;
 };
 
 export function SelectSchoolYear({
   data = [],
   field,
   isLoading,
+  className,
 }: SelectSchoolYearProps) {
   // Format school year using date-fns
   const formatSchoolYear = (startDate: string, endDate: string) => {
@@ -40,7 +42,7 @@ export function SelectSchoolYear({
     : undefined;
 
   return (
-    <div className="relative">
+    <div className={`relative ${className}`}>
       <CalendarDays className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
       <Select value={field.value} onValueChange={field.onChange}>
         <SelectTrigger className="pl-10 w-full">

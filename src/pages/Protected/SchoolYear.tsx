@@ -129,8 +129,8 @@ function SchoolYearHeader({
   )} - ${format(parseISO(selectedSchoolYear.end_date), "MMM dd, yyyy")}`;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+    <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6 ">
+      <div className="w-full flex flex-col sm:flex-row md:justify-between">
         <div className="flex items-center space-x-4">
           <div className="bg-school-100 p-3 rounded-lg">
             <GraduationCap className="h-6 w-6 sm:h-8 sm:w-8 text-school-600" />
@@ -144,7 +144,7 @@ function SchoolYearHeader({
             </p>
           </div>
         </div>
-        <div className="flex justify-between sm:flex-col gap-y-2">
+        <div className="flex flex-col sm:flex-row md:flex-col xl:flex-row gap-y-2 gap-x-3 justify-between mt-3 md:mt-0 md:justify-center lg:py-3">
           {isSchoolYearsLoading ? (
             <Loader className="animate-spin" />
           ) : (
@@ -157,7 +157,7 @@ function SchoolYearHeader({
               isLoading={isSchoolYearsLoading}
             />
           )}
-          <CreateSchoolYear />
+          <CreateSchoolYear className="" />
         </div>
       </div>
     </div>
