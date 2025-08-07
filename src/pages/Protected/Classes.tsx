@@ -203,18 +203,18 @@ function StudentListInClass({
   });
 
   return (
-    <DialogContent className="sm:max-w-[800px]">
-      <DialogHeader>
+    <DialogContent className="px-2 sm:px-5 min-h-[360px] max-h-[600px] flex flex-col">
+      <DialogHeader className="">
         <DialogTitle>{classesName} Students</DialogTitle>
         <DialogDescription>
           View and manage students enrolled in {classesName}.
         </DialogDescription>
-      </DialogHeader>
-      <div className="py-4">
         <AddStudentToClass
           schoolYearId={schoolYearId}
           classId={selectedClass}
         />
+      </DialogHeader>
+      <div className="py-4  h-full overflow-y-auto flex-1">
         {isStudentsLoading ? (
           <div className="flex h-32 items-center justify-center">
             <span className="text-gray-500">Loading students...</span>
@@ -224,7 +224,7 @@ function StudentListInClass({
             Failed to load students for this class.
           </p>
         ) : students && students.length > 0 ? (
-          <div className="w-full overflow-x-auto">
+          <div className="">
             <Table>
               <TableHeader>
                 <TableRow>
