@@ -7,6 +7,7 @@ export interface StudentProfile {
   first_name: string;
   last_name: string;
   age: number;
+  date_of_birth: string;
   school_year_id: string;
   address: string;
 }
@@ -18,7 +19,7 @@ export class StudentService {
   static async createStudent(
     first_name: string,
     last_name: string,
-    age: number,
+    date_of_birth: string,
     address: string,
     school_year_id: string
   ): Promise<StudentProfile> {
@@ -27,7 +28,7 @@ export class StudentService {
       .insert({
         first_name,
         last_name,
-        age,
+        date_of_birth,
         address,
         school_year_id,
       })
@@ -45,7 +46,7 @@ export class StudentService {
     id: string,
     first_name: string,
     last_name: string,
-    age: number,
+    date_of_birth: string,
     address: string
   ): Promise<StudentProfile> {
     const { data, error } = await supabase
@@ -53,7 +54,7 @@ export class StudentService {
       .update({
         first_name,
         last_name,
-        age,
+        date_of_birth,
         address,
       })
       .eq("id", id)

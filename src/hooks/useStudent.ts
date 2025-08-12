@@ -15,7 +15,7 @@ export const STUDENT_KEYS = {
 export interface CreateStudentData {
   first_name: string;
   last_name: string;
-  age: number;
+  date_of_birth: string;
   address: string;
   school_year_id: string;
 }
@@ -30,7 +30,7 @@ export function useCreateStudent() {
       return StudentService.createStudent(
         studentData.first_name,
         studentData.last_name,
-        studentData.age,
+        studentData.date_of_birth,
         studentData.address,
         studentData.school_year_id
       );
@@ -49,7 +49,7 @@ export interface UpdateStudentData {
   id: string;
   first_name: string;
   last_name: string;
-  age: number;
+  date_of_birth: string;
   address: string;
 }
 
@@ -64,7 +64,7 @@ export function useUpdateStudent() {
         studentData.id,
         studentData.first_name,
         studentData.last_name,
-        studentData.age,
+        studentData.date_of_birth,
         studentData.address
       );
     },
