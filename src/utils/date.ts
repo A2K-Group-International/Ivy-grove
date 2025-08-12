@@ -9,3 +9,20 @@ export const getPastYearString = () => {
   today.setDate(today.getDate() + 1);
   return today.toISOString().slice(0, 10); // "YYYY-MM-DD"
 };
+
+export function calculateAge(birthdate: string | Date): number {
+  const birth = new Date(birthdate);
+  const today = new Date();
+
+  let age = today.getFullYear() - birth.getFullYear();
+  const hasBirthdayPassed =
+    today.getMonth() > birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() &&
+      today.getDate() >= birth.getDate());
+
+  if (!hasBirthdayPassed) {
+    age--;
+  }
+
+  return age;
+}

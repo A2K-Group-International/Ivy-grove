@@ -13,6 +13,7 @@ import { Scanner } from "@yudiel/react-qr-scanner";
 import type { IDetectedBarcode } from "@yudiel/react-qr-scanner";
 import type { Student } from "@/types/attendance";
 import { useState } from "react";
+import { calculateAge } from "@/utils/date";
 
 interface QRScannerProps {
   students: Student[] | undefined;
@@ -121,6 +122,20 @@ const QRScanner = ({ students, onCheckIn, onCheckOut }: QRScannerProps) => {
                     {foundStudent.students.first_name}{" "}
                     {foundStudent.students.last_name}
                   </p>
+                  <p>
+                    <span className="font-medium">Date of Birth:</span>{" "}
+                    {foundStudent.students.date_of_birth}
+                  </p>
+                  <p>
+                    <span className="font-medium">Age:</span>{" "}
+                    {calculateAge(foundStudent.students.date_of_birth)} yrs. old
+                  </p>
+                  {/* {selectedClass && (
+                    <p>
+                      <span className="font-medium">Class:</span>{" "}
+                      {selectedClass}
+                    </p>
+                  )} */}
                 </div>
               </div>
               <div className="border rounded-lg p-4">

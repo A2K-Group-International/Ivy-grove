@@ -133,7 +133,7 @@ export const fetchStudentsPerClass = async (
   const { data, error } = await supabase
     .from("class_students")
     .select(
-      "id, class_id, student_id(id, first_name, last_name, age,address , school_year_id)"
+      "id, class_id, student_id(id, first_name, last_name, date_of_birth,address , school_year_id)"
     )
     .eq("class_id", classId)
     .order("class_id", { ascending: true });
@@ -147,7 +147,7 @@ export const fetchStudentsPerClass = async (
       id: item.student_id.id,
       first_name: item.student_id.first_name,
       last_name: item.student_id.last_name,
-      age: item.student_id.age,
+      date_of_birth: item.student_id.date_of_birth,
       address: item.student_id.address,
       school_year_id: item.student_id.school_year_id,
     })) ?? []
@@ -165,7 +165,7 @@ export const fetchStudentsByClassWithStatus = async (
   const { data, error } = await supabase
     .from("class_students")
     .select(
-      "*, attendance(id, time_in, time_out), students(id, first_name, last_name, parent_id(*))"
+      "*, attendance(id, time_in, time_out), students(id, first_name, date_of_birth, last_name, parent_id(*))"
     )
     .eq("class_id", classId)
     .eq("attendance.date", date);
