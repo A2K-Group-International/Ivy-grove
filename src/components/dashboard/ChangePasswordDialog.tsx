@@ -58,7 +58,7 @@ function ChangePasswordDialog() {
             <DialogTitle>{dialogContent.header}</DialogTitle>
             <DialogDescription>{dialogContent.description}</DialogDescription>
           </DialogHeader>
-          <ChangePasswordForm />
+          <ChangePasswordForm setOpen={setOpen} />
         </DialogContent>
       </Dialog>
     );
@@ -74,7 +74,7 @@ function ChangePasswordDialog() {
           <DrawerTitle>{dialogContent.header}</DrawerTitle>
           <DrawerDescription>{dialogContent.description}</DrawerDescription>
         </DrawerHeader>
-        <ChangePasswordForm className="px-4" />
+        <ChangePasswordForm className="px-4" setOpen={setOpen} />
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>
             <Button variant="outline">Cancel</Button>

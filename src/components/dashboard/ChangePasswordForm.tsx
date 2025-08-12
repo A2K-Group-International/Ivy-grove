@@ -12,47 +12,41 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Button } from "../ui/button";
-
 import { Input } from "../ui/input";
+import { toast } from "sonner";
+import { AuthService } from "@/services/auth.service";
 
 const PasswordChangeSchema = z.object({
-  oldPassword: z.string().min(1, "This is required"),
-  newPassword: z.string().min(1, "This is required"),
+  newPassword: z.string().min(6, "Must have at least 6 characters"),
 });
 
 type PasswordChangeValues = z.infer<typeof PasswordChangeSchema>;
 
-function ChangePasswordForm({ className }: ComponentProps<"form">) {
+type TChangePasswordForm = ComponentProps<"form"> & {
+  setOpen: (open: boolean) => void;
+};
+
+function ChangePasswordForm({ className, setOpen }: TChangePasswordForm) {
   const form = useForm<PasswordChangeValues>({
     resolver: zodResolver(PasswordChangeSchema),
     defaultValues: {
-      oldPassword: "",
       newPassword: "",
     },
   });
 
-  const onSubmit = (values: PasswordChangeValues) => {
-    console.log("Password change submitted:", values);
+  const onSubmit = ({ newPassword }: PasswordChangeValues) => {
+    try {
+      AuthService.updatePassword(newPassword);
+      toast("Successfully changed password");
+      setOpen(false);
+    } catch {
+      toast("Failed to update password. Try again");
+    }
   };
 
   return (
     <Form {...form}>
       <form className={className} onSubmit={form.handleSubmit(onSubmit)}>
-        <FormField
-          control={form.control}
-          name="oldPassword"
-          render={({ field }) => (
-            <FormItem className="grid gap-1">
-              <div className="flex justify-between">
-                <FormLabel>Old Password</FormLabel>
-                <FormMessage />
-              </div>
-              <FormControl>
-                <Input type="password" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="newPassword"
@@ -69,7 +63,7 @@ function ChangePasswordForm({ className }: ComponentProps<"form">) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full mt-3">
           Save
         </Button>
       </form>
