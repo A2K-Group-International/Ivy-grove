@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import { LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ParentSettingsPopover from "./ParentSettingsPopover";
 
 export function DashboardLayout() {
   const { signOut, userRole } = useAuth();
@@ -25,6 +26,7 @@ export function DashboardLayout() {
   const menuItems = getMenuItemsForRole(userRole);
 
   const isAdmin = userRole === "admin";
+  const isParent = userRole === "parent";
 
   const handleLogout = async () => {
     try {
@@ -121,6 +123,7 @@ export function DashboardLayout() {
                       <span className="text-sm font-medium">Settings</span>
                     </Button>
                   )}
+                  {isParent && <ParentSettingsPopover />}
                 </div>
               </SidebarMenuItem>
             </SidebarMenu>
