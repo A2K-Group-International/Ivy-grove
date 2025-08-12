@@ -7,7 +7,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { DashboardLayout } from "@/components/DashboardLayout";
+import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import Landing from "@/pages/Landing";
 import Overview from "@/pages/Protected/Overview";
 // import Settings from "@/pages/Protected/Settings";
