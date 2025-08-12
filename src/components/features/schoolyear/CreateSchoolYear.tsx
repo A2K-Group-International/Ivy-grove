@@ -58,7 +58,7 @@ const createSchoolYearSchema = z
     }
   );
 
-export function CreateSchoolYear() {
+export function CreateSchoolYear({ className }: { className?: string }) {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const { mutate: createSchoolYear, isPending } = useCreateSchoolYear();
 
@@ -90,7 +90,7 @@ export function CreateSchoolYear() {
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
       <DialogTrigger asChild>
-        <Button>Add School Year</Button>
+        <Button className={className}>Add School Year</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
