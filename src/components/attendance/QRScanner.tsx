@@ -164,9 +164,9 @@ const QRScanner = ({ students, onCheckIn, onCheckOut }: QRScannerProps) => {
 
           {scanState === "invalid" && (
             <div className="text-center space-y-3">
-              <div className="text-red-500 font-medium">QR Code is invalid</div>
+              <div className="text-red-500 font-medium">Student Not Found</div>
               <p className="text-sm text-gray-600">
-                The scanned QR code does not match any student in this class.
+                The scanned QR code does not match any student in this class. Try switching to other class.
               </p>
             </div>
           )}
