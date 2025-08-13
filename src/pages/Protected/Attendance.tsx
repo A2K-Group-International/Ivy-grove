@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
@@ -44,6 +44,13 @@ const Attendance = () => {
     isError: classIsError,
     error: classError,
   } = useClassData();
+
+  // Set class Id in the params
+  useEffect(() => {
+    if (!classId && classes && classes.length > 0) {
+      setClassId(classes[0]!.id);
+    }
+  });
 
   // Fetch the students base on class id and selected date for Attendance
   const {
@@ -122,11 +129,13 @@ const Attendance = () => {
 
         <div className="flex gap-2">
           {/* QR SCANNER /> */}
-          <QRScanner
-            students={students}
-            onCheckIn={handleCheckIn}
-            onCheckOut={handleCheckOut}
-          />
+          {classId && (
+            <QRScanner
+              students={students}
+              onCheckIn={handleCheckIn}
+              onCheckOut={handleCheckOut}
+            />
+          )}
         </div>
       </div>
 

@@ -16,6 +16,7 @@ import {
   useUnlinkStudentFromParent,
 } from "@/hooks/useParents";
 import type { StudentWithParent } from "@/services/user.service";
+import { calculateAge } from "@/utils/date";
 
 interface StudentLinkModalProps {
   parentId: string;
@@ -123,9 +124,11 @@ export function StudentLinkModal({
                         <p className="font-medium text-sm">
                           {student.first_name} {student.last_name}
                         </p>
-                        <p className="text-xs text-gray-600">
-                          Age {student.age}
-                        </p>
+                        {student.date_of_birth && (
+                          <p className="text-xs text-gray-600">
+                            Age {calculateAge(student.date_of_birth)}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <Button
@@ -191,9 +194,11 @@ export function StudentLinkModal({
                         <p className="font-medium text-sm">
                           {student.first_name} {student.last_name}
                         </p>
-                        <p className="text-xs text-gray-600">
-                          Age {student.age}
-                        </p>
+                        {student.date_of_birth && (
+                          <p className="text-xs text-gray-600">
+                            Age {calculateAge(student.date_of_birth)}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

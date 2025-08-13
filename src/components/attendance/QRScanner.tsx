@@ -13,6 +13,8 @@ import { Scanner } from "@yudiel/react-qr-scanner";
 import type { IDetectedBarcode } from "@yudiel/react-qr-scanner";
 import type { Student } from "@/types/attendance";
 import { useState } from "react";
+import { calculateAge } from "@/utils/date";
+import { format } from "date-fns";
 
 interface QRScannerProps {
   students: Student[] | undefined;
@@ -121,6 +123,28 @@ const QRScanner = ({ students, onCheckIn, onCheckOut }: QRScannerProps) => {
                     {foundStudent.students.first_name}{" "}
                     {foundStudent.students.last_name}
                   </p>
+                  <p>
+                    <span className="font-medium">Date of Birth:</span>{" "}
+                    {foundStudent.students.date_of_birth
+                      ? format(
+                          foundStudent.students.date_of_birth,
+                          "MMMM d, yyyy"
+                        )
+                      : "Date of birth not set"}
+                  </p>
+                  {foundStudent.students.date_of_birth && (
+                    <p>
+                      <span className="font-medium">Age:</span>{" "}
+                      {calculateAge(foundStudent.students.date_of_birth) > 1
+                        ? `${calculateAge(
+                            foundStudent.students.date_of_birth
+                          )} years`
+                        : `${calculateAge(
+                            foundStudent.students.date_of_birth
+                          )} year`}{" "}
+                      old
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="border rounded-lg p-4">
@@ -149,9 +173,10 @@ const QRScanner = ({ students, onCheckIn, onCheckOut }: QRScannerProps) => {
 
           {scanState === "invalid" && (
             <div className="text-center space-y-3">
-              <div className="text-red-500 font-medium">QR Code is invalid</div>
+              <div className="text-red-500 font-medium">Student Not Found</div>
               <p className="text-sm text-gray-600">
                 The scanned QR code does not match any student in this class.
+                Try switching to other class.
               </p>
             </div>
           )}
