@@ -11,6 +11,7 @@ type Student = {
     id: string;
     first_name: string;
     last_name: string;
+    date_of_birth: string | null;
     parent_id: {
       id: string;
       first_name: string;

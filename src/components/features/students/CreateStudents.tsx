@@ -26,6 +26,7 @@ import { Calendar, Loader, Locate, PlusIcon, User } from "lucide-react";
 import { useState } from "react";
 import { useCreateStudent } from "@/hooks/useStudent";
 import { toast } from "sonner";
+import { getTodayString, getPastYearString } from "@/utils/date";
 
 const createStudentSchema = z.object({
   first_name: z
@@ -36,7 +37,11 @@ const createStudentSchema = z.object({
     .string()
     .min(1, "Last name is required")
     .max(50, "Last name must be less than 50 characters"),
-  age: z.coerce.number().int().min(1, "Age must be at least 1"),
+  date_of_birth: z
+    .string()
+    .refine((val) => val < getTodayString() && val < getPastYearString(), {
+      message: "Student must at least be 1 year old",
+    }),
   address: z
     .string()
     .min(1, "Address is required")
@@ -56,7 +61,7 @@ export function CreateStudents({ schoolYearId }: SchoolYearProps) {
     defaultValues: {
       first_name: "",
       last_name: "",
-      age: 0,
+      date_of_birth: "",
       address: "",
     },
     mode: "onChange",
@@ -175,17 +180,17 @@ export function CreateStudents({ schoolYearId }: SchoolYearProps) {
 
                 <FormField
                   control={form.control}
-                  name="age"
+                  name="date_of_birth"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm text-school-600 font-medium">
-                        Age
+                        Date of Birth
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Input
-                            type="number"
+                            type="date"
                             className="pl-10 focus:ring-ring"
                             placeholder="Age"
                             {...field}

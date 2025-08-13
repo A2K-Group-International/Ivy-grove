@@ -218,6 +218,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "group_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "grpup_members_added_by_fkey"
             columns: ["added_by"]
             isOneToOne: false
@@ -229,13 +236,6 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "groups"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "grpup_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -313,27 +313,31 @@ export type Database = {
           created_at: string
           end_date: string
           id: string
+          is_active: boolean
           start_date: string
         }
         Insert: {
           created_at?: string
           end_date: string
           id?: string
+          is_active?: boolean
           start_date: string
         }
         Update: {
           created_at?: string
           end_date?: string
           id?: string
+          is_active?: boolean
           start_date?: string
         }
         Relationships: []
       }
       students: {
         Row: {
-          address: string
-          age: number
+          address: string | null
+          age: number | null
           created_at: string
+          date_of_birth: string | null
           first_name: string
           id: string
           last_name: string
@@ -341,9 +345,10 @@ export type Database = {
           school_year_id: string
         }
         Insert: {
-          address: string
-          age: number
+          address?: string | null
+          age?: number | null
           created_at?: string
+          date_of_birth?: string | null
           first_name: string
           id?: string
           last_name: string
@@ -351,9 +356,10 @@ export type Database = {
           school_year_id: string
         }
         Update: {
-          address?: string
-          age?: number
+          address?: string | null
+          age?: number | null
           created_at?: string
+          date_of_birth?: string | null
           first_name?: string
           id?: string
           last_name?: string
@@ -381,6 +387,7 @@ export type Database = {
         Row: {
           address: string
           contact: string
+          created_at: string | null
           email: string
           first_name: string
           id: string
@@ -390,6 +397,7 @@ export type Database = {
         Insert: {
           address: string
           contact: string
+          created_at?: string | null
           email: string
           first_name: string
           id?: string
@@ -399,6 +407,7 @@ export type Database = {
         Update: {
           address?: string
           contact?: string
+          created_at?: string | null
           email?: string
           first_name?: string
           id?: string

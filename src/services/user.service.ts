@@ -25,8 +25,8 @@ export interface StudentWithParent {
   id: string;
   first_name: string;
   last_name: string;
-  age: number;
-  address: string;
+  date_of_birth: string | null;
+  address: string | null;
   school_year_id: string;
 }
 
@@ -126,7 +126,9 @@ export class UserService {
   ): Promise<StudentWithParent[]> {
     const { data, error } = await supabase
       .from("students")
-      .select("id, first_name, last_name, age, address, school_year_id")
+      .select(
+        "id, first_name, last_name, date_of_birth, address, school_year_id"
+      )
       .eq("parent_id", parentId)
       .order("first_name", { ascending: true });
 
@@ -218,7 +220,9 @@ export class UserService {
   static async getUnlinkedStudents(): Promise<StudentWithParent[]> {
     const { data, error } = await supabase
       .from("students")
-      .select("id, first_name, last_name, age, address, school_year_id")
+      .select(
+        "id, first_name, last_name, date_of_birth, address, school_year_id"
+      )
       .is("parent_id", null)
       .order("first_name", { ascending: true });
 

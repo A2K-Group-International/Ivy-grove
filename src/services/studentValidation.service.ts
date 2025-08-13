@@ -36,13 +36,13 @@ export const checkStudentExists = async (
 export const createStudentWithValidation = async (
   firstName: string,
   lastName: string,
-  age: number,
+  date_of_birth: string,
   address: string,
   schoolYearId: string
 ) => {
   // Check if student already exists
   const exists = await checkStudentExists(firstName, lastName, schoolYearId);
-  
+
   if (exists) {
     throw new Error(
       `A student named "${firstName} ${lastName}" already exists in this school year.`
@@ -55,7 +55,7 @@ export const createStudentWithValidation = async (
     .insert({
       first_name: firstName.trim(),
       last_name: lastName.trim(),
-      age,
+      date_of_birth,
       address: address.trim(),
       school_year_id: schoolYearId,
     })
