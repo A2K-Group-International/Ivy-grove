@@ -162,7 +162,7 @@ const QRScanner = ({ students, onCheckIn, onCheckOut }: QRScannerProps) => {
                     </p>
                     <p>
                       <span className="font-medium">Address:</span>{" "}
-                      {foundStudent.students.parent_id.address ||
+                      {foundStudent.students.parent_id.address.trim() ||
                         "No address provided"}
                     </p>
                   </div>
