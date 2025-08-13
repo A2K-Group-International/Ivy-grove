@@ -133,7 +133,10 @@ const StudentsTable = ({ schoolYearId }: StudentsTableProps) => {
                 <TableCell className="py-4 text-center">
                   {student.date_of_birth ? (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {calculateAge(student.date_of_birth)} years
+                      {calculateAge(student.date_of_birth) > 1
+                        ? `${calculateAge(student.date_of_birth)} years`
+                        : `${calculateAge(student.date_of_birth)} year`}{" "}
+                      old
                     </span>
                   ) : (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-500 border">

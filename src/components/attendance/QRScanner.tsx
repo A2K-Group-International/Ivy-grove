@@ -14,6 +14,7 @@ import type { IDetectedBarcode } from "@yudiel/react-qr-scanner";
 import type { Student } from "@/types/attendance";
 import { useState } from "react";
 import { calculateAge } from "@/utils/date";
+import { format } from "date-fns";
 
 interface QRScannerProps {
   students: Student[] | undefined;
@@ -124,11 +125,22 @@ const QRScanner = ({ students, onCheckIn, onCheckOut }: QRScannerProps) => {
                   </p>
                   <p>
                     <span className="font-medium">Date of Birth:</span>{" "}
-                    {foundStudent.students.date_of_birth}
+                    {format(
+                      foundStudent.students.date_of_birth,
+                      "MMMM d, yyyy"
+                    )}
                   </p>
                   <p>
                     <span className="font-medium">Age:</span>{" "}
-                    {calculateAge(foundStudent.students.date_of_birth)} yrs. old
+                    {calculateAge(foundStudent.students.date_of_birth) > 1
+                      ? `${calculateAge(
+                          foundStudent.students.date_of_birth
+                        )} years`
+                      : `${calculateAge(
+                          foundStudent.students.date_of_birth
+                        )} year`}{" "}
+                    old
+                    {/* {calculateAge(foundStudent.students.date_of_birth)} yrs. old */}
                   </p>
                   {/* {selectedClass && (
                     <p>
@@ -166,7 +178,8 @@ const QRScanner = ({ students, onCheckIn, onCheckOut }: QRScannerProps) => {
             <div className="text-center space-y-3">
               <div className="text-red-500 font-medium">Student Not Found</div>
               <p className="text-sm text-gray-600">
-                The scanned QR code does not match any student in this class. Try switching to other class.
+                The scanned QR code does not match any student in this class.
+                Try switching to other class.
               </p>
             </div>
           )}
