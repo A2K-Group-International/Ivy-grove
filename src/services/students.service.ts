@@ -6,9 +6,9 @@ export interface StudentProfile {
   id: string;
   first_name: string;
   last_name: string;
-  date_of_birth: string;
+  date_of_birth: string | null;
   school_year_id: string;
-  address: string;
+  address: string | null;
 }
 
 export class StudentService {

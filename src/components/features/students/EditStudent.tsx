@@ -63,8 +63,8 @@ export function EditStudent({ student, open, onOpenChange }: EditStudentProps) {
     defaultValues: {
       first_name: student.first_name,
       last_name: student.last_name,
-      date_of_birth: student.date_of_birth,
-      address: student.address,
+      date_of_birth: student.date_of_birth ? student.date_of_birth : "",
+      address: student.address ? student.address : "",
     },
     mode: "onChange",
   });

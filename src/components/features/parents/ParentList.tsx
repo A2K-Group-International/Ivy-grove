@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { StudentLinkModal } from "./StudentLinkModal";
 import { EditParent } from "./EditParent";
 import { DeleteParent } from "./DeleteParent";
+import { calculateAge } from "@/utils/date";
 
 interface ParentListProps {
   isActive: boolean;
@@ -178,7 +179,12 @@ function ParentCard({ parent }: ParentCardProps) {
                     <p className="font-medium text-sm">
                       {student.first_name} {student.last_name}
                     </p>
-                    <p className="text-xs text-gray-600">Age {student.age}</p>
+                    {student.date_of_birth && (
+                      <p className="text-xs text-gray-600">
+                        Age {calculateAge(student.date_of_birth)}
+                      </p>
+                    )}
+                    {/* <p className="text-xs text-gray-600">Age {student.age}</p> */}
                   </div>
                 </div>
               ))

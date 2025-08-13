@@ -125,29 +125,26 @@ const QRScanner = ({ students, onCheckIn, onCheckOut }: QRScannerProps) => {
                   </p>
                   <p>
                     <span className="font-medium">Date of Birth:</span>{" "}
-                    {format(
-                      foundStudent.students.date_of_birth,
-                      "MMMM d, yyyy"
-                    )}
+                    {foundStudent.students.date_of_birth
+                      ? format(
+                          foundStudent.students.date_of_birth,
+                          "MMMM d, yyyy"
+                        )
+                      : "Date of birth not set"}
                   </p>
-                  <p>
-                    <span className="font-medium">Age:</span>{" "}
-                    {calculateAge(foundStudent.students.date_of_birth) > 1
-                      ? `${calculateAge(
-                          foundStudent.students.date_of_birth
-                        )} years`
-                      : `${calculateAge(
-                          foundStudent.students.date_of_birth
-                        )} year`}{" "}
-                    old
-                    {/* {calculateAge(foundStudent.students.date_of_birth)} yrs. old */}
-                  </p>
-                  {/* {selectedClass && (
+                  {foundStudent.students.date_of_birth && (
                     <p>
-                      <span className="font-medium">Class:</span>{" "}
-                      {selectedClass}
+                      <span className="font-medium">Age:</span>{" "}
+                      {calculateAge(foundStudent.students.date_of_birth) > 1
+                        ? `${calculateAge(
+                            foundStudent.students.date_of_birth
+                          )} years`
+                        : `${calculateAge(
+                            foundStudent.students.date_of_birth
+                          )} year`}{" "}
+                      old
                     </p>
-                  )} */}
+                  )}
                 </div>
               </div>
               <div className="border rounded-lg p-4">

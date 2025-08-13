@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader, User, Users } from "lucide-react";
 import { useStudentsByParentId } from "@/hooks/useParents";
 import { useAuth } from "@/context/AuthContext";
+import { calculateAge } from "@/utils/date";
 
 export default function Children() {
   const { userProfile } = useAuth();
@@ -82,7 +83,11 @@ export default function Children() {
                     <CardTitle className="text-lg">
                       {student.first_name} {student.last_name}
                     </CardTitle>
-                    <p className="text-sm text-gray-600">Age {student.age}</p>
+                    <p className="text-sm text-gray-600">
+                      {student.date_of_birth
+                        ? "Age " + calculateAge(student.date_of_birth)
+                        : "Date of birth not set"}
+                    </p>
                   </div>
                 </div>
               </CardHeader>
