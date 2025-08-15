@@ -77,7 +77,7 @@ export function ChatInterface({ group, currentUserName }: ChatInterfaceProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="relative flex flex-col h-full ">
       {/* Chat Header - Hidden on mobile as it's handled in parent */}
       <div className="hidden md:block border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
@@ -107,7 +107,10 @@ export function ChatInterface({ group, currentUserName }: ChatInterfaceProps) {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 p-4 overflow-y-auto" ref={containerRef}>
+      <div
+        className="flex-1 px-1 overflow-y-auto place-content-end"
+        ref={containerRef}
+      >
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
@@ -123,11 +126,12 @@ export function ChatInterface({ group, currentUserName }: ChatInterfaceProps) {
                 </span>
               </div>
             )}
-            {messages.map((message) => (
+            {messages.map((message, index) => (
               <MessageBubble
                 key={message.id}
                 message={message}
                 currentUserName={currentUserName}
+                className={index === messages.length - 1 ? "pb-16" : ""}
               />
             ))}
             {messages.length === 0 && (
@@ -140,7 +144,7 @@ export function ChatInterface({ group, currentUserName }: ChatInterfaceProps) {
       </div>
 
       {/* Message Input */}
-      <div className="border-t border-gray-200 py-2">
+      <div className="border-t border-gray-200 absolute bottom-0 w-full py-3 bg-white">
         <div className="flex items-end space-x-2">
           <div className="flex-1 px-2 relative">
             <Input

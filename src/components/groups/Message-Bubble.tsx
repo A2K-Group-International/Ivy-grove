@@ -5,17 +5,18 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 interface MessageBubbleProps {
   message: Message;
   currentUserName?: string;
+  className?: string;
 }
 
 // Helper function to format timestamp
 function formatTimestamp(timestamp: string): string {
   const date = new Date(timestamp);
-  
+
   // Check if the date is valid
   if (isNaN(date.getTime())) {
     return "Invalid date";
   }
-  
+
   const now = new Date();
   const isToday = date.toDateString() === now.toDateString();
 
@@ -34,6 +35,7 @@ function formatTimestamp(timestamp: string): string {
 export function MessageBubble({
   message,
   currentUserName,
+  className,
 }: MessageBubbleProps) {
   // Determine if this message is from the current user
   const isOwn = currentUserName
@@ -47,7 +49,8 @@ export function MessageBubble({
     <div
       className={cn(
         "flex items-start space-x-3",
-        isOwn && "flex-row-reverse space-x-reverse"
+        isOwn && "flex-row-reverse space-x-reverse",
+        className
       )}
     >
       {!isOwn && (
