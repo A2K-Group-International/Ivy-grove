@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { getMenuItemsForRole } from "@/lib/navigation";
 import {
@@ -14,19 +14,15 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { LogOut, Settings } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ParentSettingsPopover from "./ParentSettingsPopover";
 
 export function DashboardLayout() {
   const { signOut, userRole } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
 
   const menuItems = getMenuItemsForRole(userRole);
-
-  const isAdmin = userRole === "admin";
-  const isParent = userRole === "parent";
 
   const handleLogout = async () => {
     try {
@@ -34,10 +30,6 @@ export function DashboardLayout() {
     } catch (error) {
       console.error("Logout failed:", error);
     }
-  };
-
-  const navigateSettings = () => {
-    navigate("/settings");
   };
 
   return (
@@ -113,17 +105,7 @@ export function DashboardLayout() {
                     <LogOut className="h-4 w-4" />
                     <span className="text-sm font-medium">Logout</span>
                   </Button>
-                  {isAdmin && (
-                    <Button
-                      variant="ghost"
-                      onClick={navigateSettings}
-                      className="w-full justify-start gap-2 hover:bg-school-50 hover:text-school-700 text-gray-600 rounded-lg py-2.5 transition-all duration-200"
-                    >
-                      <Settings className="h-4 w-4" />
-                      <span className="text-sm font-medium">Settings</span>
-                    </Button>
-                  )}
-                  {isParent && <ParentSettingsPopover />}
+                  <ParentSettingsPopover />
                 </div>
               </SidebarMenuItem>
             </SidebarMenu>

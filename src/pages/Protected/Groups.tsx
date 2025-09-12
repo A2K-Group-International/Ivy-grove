@@ -65,7 +65,7 @@ function Groups() {
   }
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full w-full m-0">
       {/* Desktop Layout */}
       <div className="hidden md:flex w-full">
         {/* Sidebar */}
@@ -125,22 +125,22 @@ function Groups() {
             isLoading={isLoading}
           />
         ) : selectedGroup ? (
-          <div className="flex flex-col h-[calc(100%-2.5rem)]">
-            <div className="border-b border-gray-200 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-x-2">
+          <div className="flex flex-col h-[calc(100%-1rem)]">
+            <div className=" border-b border-gray-200 flex justify-between pb-0.5">
+              <div className="flex items-center">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleBackToGroups}
-                  className="mr-3 p-1"
+                  className="px-0 mx-0"
                 >
-                  <ArrowLeft className="h-5 w-5" />
+                  <ArrowLeft className="h-5 w-5 mx-0" />
                 </Button>
                 <Avatar>
                   <AvatarImage src="/Ivy-logo.png" />
                   <AvatarFallback>Ivy</AvatarFallback>
                 </Avatar>
-                <h2 className="font-semibold text-gray-900">
+                <h2 className="ml-2 sm:ml-4 font-semibold text-gray-900">
                   {selectedGroup.name}
                 </h2>
               </div>

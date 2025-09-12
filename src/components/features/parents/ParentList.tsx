@@ -137,7 +137,9 @@ function ParentCard({ parent }: ParentCardProps) {
           </Label>
           <Label className="text-sm text-gray-500">
             <Home size={18} />
-            {parent.address || "No address provided"}
+            {parent.address.trim() !== ""
+              ? parent.address
+              : "No address provided"}
           </Label>
         </div>
         {/* Student List */}

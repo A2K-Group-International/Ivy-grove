@@ -34,7 +34,7 @@ export function GroupList({
     <div className="flex flex-col h-dvh">
       {/* Header */}
       <div className="border-b border-gray-200">
-        <div className="flex items-center justify-between px-2">
+        <div className="flex justify-between px-1">
           <h1 className="text-xl font-semibold text-gray-900 mb-4">Groups</h1>
           {isAdmin && <CreateGroupForm />}
         </div>
