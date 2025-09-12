@@ -12,9 +12,16 @@ import { QrCode } from "lucide-react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import type { IDetectedBarcode } from "@yudiel/react-qr-scanner";
 import type { Student } from "@/types/attendance";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { calculateAge } from "@/utils/date";
 import { format } from "date-fns";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+  SelectTrigger,
+} from "../ui/select";
 
 interface QRScannerProps {
   students: Student[] | undefined;
@@ -27,6 +34,8 @@ type ScanState = "scanning" | "valid" | "invalid";
 const QRScanner = ({ students, onCheckIn, onCheckOut }: QRScannerProps) => {
   const [foundStudent, setFoundStudent] = useState<Student | null>(null);
   const [scanState, setScanState] = useState<ScanState>("scanning");
+  const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
+  const [cameraId, setCameraId] = useState<string | undefined>();
 
   const handleScan = (detectedCodes: IDetectedBarcode[]) => {
     if (!detectedCodes.length) return;
@@ -87,6 +96,80 @@ const QRScanner = ({ students, onCheckIn, onCheckOut }: QRScannerProps) => {
     }
     return "Already Complete";
   };
+
+  const capitalize = (str: string) => {
+    const strArr = str.split(" ");
+    const words = strArr
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+    return words;
+  };
+
+  const getUserDevices = async () => {
+    try {
+      const allDevices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = allDevices.filter((d) => d.kind === "videoinput");
+
+      setCameras(videoDevices);
+
+      const frontCam = videoDevices.find((d) =>
+        /front|user|face/i.test(d.label)
+      );
+
+      setCameraId(frontCam ? frontCam.deviceId : videoDevices[0]?.deviceId);
+    } catch (err) {
+      console.error("Camera init failed:", err);
+    }
+  };
+
+  // navigator.permissions
+  //   .query({ name: "camera" as PermissionName })
+  //   .then((status) => {
+  //     console.log("Current state:", status.state);
+
+  //     status.onchange = () => {
+  //       if (status.state == "granted") {
+  //         getUserDevices();
+  //       }
+  //     };
+  //   });
+
+  useEffect(() => {
+    let isMounted = false;
+
+    const setUpDevices = async () => {
+      try {
+        const status = await navigator.permissions.query({
+          name: "camera" as PermissionName,
+        });
+
+        if (status.state == "granted") {
+          getUserDevices();
+        }
+
+        status.onchange = () => {
+          if (isMounted) return;
+
+          if (status.state == "granted") {
+            getUserDevices();
+          } else {
+            setCameras([]);
+            setCameraId(undefined);
+          }
+        };
+      } catch (error) {
+        console.warn("Permissions API not fully supported, fallback:", error);
+        getUserDevices();
+      }
+    };
+
+    setUpDevices();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -97,17 +180,41 @@ const QRScanner = ({ students, onCheckIn, onCheckOut }: QRScannerProps) => {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Digital ID Scanner</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="justify-center items-center md:flex md:gap-1">
             {scanState === "scanning" &&
               "Scan the QR Code to identify the student."}
             {scanState === "invalid" && "Invalid QR Code"}
+
+            {cameras.length > 0 && cameraId && (
+              <div className=" w-full">
+                <Select value={cameraId} onValueChange={setCameraId}>
+                  <SelectTrigger className="mx-auto">
+                    <SelectValue placeholder="Select a camera" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cameras.map((camera, index) => (
+                      <SelectItem value={camera.deviceId} key={index}>
+                        {capitalize(camera.label) || `Camera ${index + 1}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {scanState === "scanning" && (
             <div className="flex justify-center">
-              <Scanner sound={false} onScan={handleScan} />
+              <Scanner
+                sound={false}
+                onScan={handleScan}
+                constraints={{
+                  deviceId: cameraId ? cameraId : "",
+                  // facingMode: "user",
+                }}
+              />
             </div>
           )}
 
